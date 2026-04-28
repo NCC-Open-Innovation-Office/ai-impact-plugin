@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Environmental Impact Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1117; --card: #1a1d27; --border: #2d3148;
+    --text: #e2e8f0; --muted: #94a3b8;
+    --green: #22c55e; --blue: #3b82f6; --amber: #f59e0b; --red: #ef4444;
+    --purple: #8b5cf6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; padding: 1.5rem; min-height: 100vh; }
+  h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: .25rem; }
+  .subtitle { color: var(--muted); font-size: .875rem; margin-bottom: 2rem; }
+  .subtitle a { color: var(--blue); text-decoration: none; }
+  .subtitle a:hover { text-decoration: underline; }
+
+  /* Upload section */
+  .upload-section { background: var(--card); border: 2px dashed var(--border); border-radius: 1rem; padding: 2rem; text-align: center; margin-bottom: 2rem; transition: border-color .2s; }
+  .upload-section.drag-over { border-color: var(--blue); }
+  .upload-section h2 { font-size: 1.1rem; margin-bottom: .5rem; }
+  .upload-section p { color: var(--muted); font-size: .875rem; margin-bottom: 1rem; }
+  .btn { display: inline-block; background: var(--blue); color: white; border: none; border-radius: .5rem; padding: .6rem 1.25rem; font-size: .875rem; font-weight: 600; cursor: pointer; transition: opacity .2s; }
+  .btn:hover { opacity: .85; }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+  .btn-outline:hover { background: var(--border); opacity: 1; }
+  input[type=file] { display: none; }
+
+  /* Demo data notice */
+  #demo-notice { background: #1e3a5f; border: 1px solid var(--blue); border-radius: .75rem; padding: 1rem 1.25rem; margin-bottom: 1.5rem; font-size: .875rem; color: #93c5fd; display: none; }
+
+  /* Summary cards */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: .75rem; padding: 1.25rem; }
+  .card-label { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: .25rem; }
+  .card-value { font-size: 1.6rem; font-weight: 700; line-height: 1; }
+  .card-unit { font-size: .75rem; color: var(--muted); margin-top: .25rem; }
+  .text-blue { color: var(--blue); }
+  .text-green { color: var(--green); }
+  .text-amber { color: var(--amber); }
+  .text-red { color: var(--red); }
+
+  /* Charts grid */
+  .charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+  .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: .75rem; padding: 1.25rem; }
+  .chart-card h2 { font-size: .95rem; font-weight: 600; margin-bottom: 1rem; color: var(--text); }
+  canvas { max-height: 240px; }
+
+  /* Tables */
+  .section { background: var(--card); border: 1px solid var(--border); border-radius: .75rem; padding: 1.25rem; margin-bottom: 1rem; overflow-x: auto; }
+  .section h2 { font-size: .95rem; font-weight: 600; margin-bottom: 1rem; }
+  table { width: 100%; border-collapse: collapse; font-size: .85rem; white-space: nowrap; }
+  th { text-align: left; padding: .5rem .75rem; color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--border); font-size: .75rem; text-transform: uppercase; letter-spacing: .05em; }
+  td { padding: .5rem .75rem; border-bottom: 1px solid #ffffff0a; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #ffffff06; }
+  .badge { display: inline-block; padding: .15rem .5rem; border-radius: 9999px; font-size: .7rem; font-weight: 600; }
+  .badge-blue { background: #1e40af44; color: #93c5fd; }
+
+  /* References */
+  .refs { background: var(--card); border: 1px solid var(--border); border-radius: .75rem; padding: 1.25rem; font-size: .8rem; color: var(--muted); line-height: 1.8; }
+  .refs strong { color: var(--text); }
+  .refs a { color: var(--blue); text-decoration: none; }
+  .refs a:hover { text-decoration: underline; }
+
+  /* Hidden until data loaded */
+  #dashboard { display: none; }
+</style>
+</head>
+<body>
+
+<h1>🌱 AI Environmental Impact Dashboard</h1>
+<p class="subtitle">
+  Visualise the CO₂ emissions, water consumption, energy usage, and cost of your AI interactions.
+  Powered by the <a href="https://github.com/marshalmiller/ai-impact-plugin">AI Impact Plugin</a>.
+  Methodology: energy from <a href="https://arxiv.org/abs/2311.16863">Luccioni et al. (2023)</a>;
+  water from <a href="https://arxiv.org/abs/2304.03271">Li et al. (2023)</a>;
+  carbon from <a href="https://www.epa.gov/egrid">US EPA eGRID 2022</a>.
+</p>
+
+<!-- Data load section -->
+<div class="upload-section" id="upload-section">
+  <h2>📂 Load Your Usage Data</h2>
+  <p>Export your data from Open WebUI by asking the AI: <em>"export my AI impact data as JSON"</em>,<br>
+     then upload the resulting <code>data.json</code> file below — or load the demo data to explore.</p>
+  <input type="file" id="file-input" accept=".json,application/json">
+  <button class="btn" onclick="document.getElementById('file-input').click()">Upload data.json</button>
+  &nbsp;
+  <button class="btn btn-outline" onclick="loadDemoData()">Load Demo Data</button>
+</div>
+
+<div id="demo-notice">
+  ℹ️ You are viewing <strong>demo data</strong>. To see your real usage, export data from Open WebUI and upload it above.
+</div>
+
+<!-- Main dashboard (hidden until data is loaded) -->
+<div id="dashboard">
+
+  <!-- Summary cards -->
+  <div class="cards">
+    <div class="card">
+      <div class="card-label">Total Queries</div>
+      <div class="card-value text-blue" id="stat-queries">—</div>
+      <div class="card-unit">AI requests</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Total Tokens</div>
+      <div class="card-value text-blue" id="stat-tokens">—</div>
+      <div class="card-unit">input + output</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Energy Used</div>
+      <div class="card-value text-amber" id="stat-energy">—</div>
+      <div class="card-unit" id="stat-energy-unit">mWh</div>
+    </div>
+    <div class="card">
+      <div class="card-label">CO₂ Emitted</div>
+      <div class="card-value text-red" id="stat-co2">—</div>
+      <div class="card-unit" id="stat-co2-unit">mg CO₂</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Water Used</div>
+      <div class="card-value text-green" id="stat-water">—</div>
+      <div class="card-unit" id="stat-water-unit">mL</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Est. Cost</div>
+      <div class="card-value text-amber" id="stat-cost">—</div>
+      <div class="card-unit">USD</div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="charts">
+    <div class="chart-card">
+      <h2>Daily CO₂ Emissions</h2>
+      <canvas id="co2Chart"></canvas>
+    </div>
+    <div class="chart-card">
+      <h2>Daily Water Usage</h2>
+      <canvas id="waterChart"></canvas>
+    </div>
+    <div class="chart-card">
+      <h2>CO₂ by Model</h2>
+      <canvas id="modelCo2Chart"></canvas>
+    </div>
+    <div class="chart-card">
+      <h2>Cost by Model</h2>
+      <canvas id="modelCostChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Per-model table -->
+  <div class="section">
+    <h2>Per-Model Breakdown</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>Queries</th>
+          <th>Tokens</th>
+          <th>Energy</th>
+          <th>CO₂</th>
+          <th>Water</th>
+          <th>Cost</th>
+        </tr>
+      </thead>
+      <tbody id="model-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- Recent queries table -->
+  <div class="section">
+    <h2>Recent Queries</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Time (UTC)</th>
+          <th>Model</th>
+          <th>Tokens</th>
+          <th>CO₂</th>
+          <th>Water</th>
+          <th>Cost</th>
+        </tr>
+      </thead>
+      <tbody id="recent-tbody"></tbody>
+    </table>
+  </div>
+
+</div><!-- #dashboard -->
+
+<!-- References -->
+<div class="refs">
+  <strong>Scientific References</strong><br>
+  [1] Luccioni, A.S., Viguier, S. &amp; Ligozat, A-L. (2023).
+      <em>Power Hungry Processing: Watts Driving the Cost of AI Deployment?</em>
+      <a href="https://arxiv.org/abs/2311.16863" target="_blank">arXiv:2311.16863</a> /
+      <a href="https://doi.org/10.1145/3627673.3679071" target="_blank">DOI:10.1145/3627673.3679071</a>.<br>
+  [2] Li, P., Yang, J., Islam, M.A. &amp; Ren, S. (2023).
+      <em>Making AI Less "Thirsty": Uncovering and Addressing the Secret Water Footprint of AI Models.</em>
+      <a href="https://arxiv.org/abs/2304.03271" target="_blank">arXiv:2304.03271</a>.<br>
+  [3] US EPA. (2022). <em>eGRID 2022 — Emissions &amp; Generation Resource Integrated Database.</em>
+      <a href="https://www.epa.gov/egrid/download-data" target="_blank">epa.gov/egrid</a>.
+</div>
+
+<script>
+// ---- Chart.js global defaults (dark theme) ----
+Chart.defaults.color = '#94a3b8';
+Chart.defaults.borderColor = '#2d3148';
+const PALETTE = ['#3b82f6','#ef4444','#22c55e','#f59e0b','#8b5cf6','#ec4899','#14b8a6','#f97316','#64748b','#a78bfa'];
+
+let charts = {};
+
+function destroyCharts() {
+  Object.values(charts).forEach(c => c.destroy());
+  charts = {};
+}
+
+// ---- Data processing ----
+function processRecords(records) {
+  const totals = { queries: 0, tokens: 0, energy_wh: 0, co2_g: 0, water_ml: 0, cost_usd: 0 };
+  const byModel = {};
+  const byDay = {};
+
+  records.forEach(r => {
+    totals.queries++;
+    totals.tokens += r.total_tokens || 0;
+    totals.energy_wh += r.energy_wh || 0;
+    totals.co2_g += r.co2_g || 0;
+    totals.water_ml += r.water_ml || 0;
+    totals.cost_usd += r.cost_usd || 0;
+
+    // By model
+    if (!byModel[r.model]) byModel[r.model] = { queries:0, tokens:0, energy_wh:0, co2_g:0, water_ml:0, cost_usd:0 };
+    byModel[r.model].queries++;
+    byModel[r.model].tokens += r.total_tokens || 0;
+    byModel[r.model].energy_wh += r.energy_wh || 0;
+    byModel[r.model].co2_g += r.co2_g || 0;
+    byModel[r.model].water_ml += r.water_ml || 0;
+    byModel[r.model].cost_usd += r.cost_usd || 0;
+
+    // By day
+    const day = (r.timestamp || '').substring(0, 10);
+    if (day) {
+      if (!byDay[day]) byDay[day] = { co2_g:0, water_ml:0, cost_usd:0, queries:0 };
+      byDay[day].co2_g += r.co2_g || 0;
+      byDay[day].water_ml += r.water_ml || 0;
+      byDay[day].cost_usd += r.cost_usd || 0;
+      byDay[day].queries++;
+    }
+  });
+
+  return { totals, byModel, byDay };
+}
+
+// ---- Formatting helpers ----
+function fmtNum(n) { return n.toLocaleString(undefined, {maximumFractionDigits: 4}); }
+function fmtCost(n) { return '$' + n.toLocaleString(undefined, {minimumFractionDigits:6, maximumFractionDigits:6}); }
+function autoScale(value, unitBase) {
+  if (value >= 1000) return [+(value/1000).toPrecision(4), 'k' + unitBase];
+  if (value >= 1000000) return [+(value/1000000).toPrecision(4), 'M' + unitBase];
+  return [+value.toPrecision(4), unitBase];
+}
+
+// ---- Render dashboard ----
+function renderDashboard(records) {
+  const { totals, byModel, byDay } = processRecords(records);
+
+  // Summary cards
+  document.getElementById('stat-queries').textContent = totals.queries.toLocaleString();
+  document.getElementById('stat-tokens').textContent = totals.tokens.toLocaleString();
+
+  const [eVal, eUnit] = autoScale(totals.energy_wh * 1000, 'mWh');
+  document.getElementById('stat-energy').textContent = fmtNum(eVal);
+  document.getElementById('stat-energy-unit').textContent = eUnit;
+
+  const [cVal, cUnit] = autoScale(totals.co2_g * 1000, 'mg CO₂');
+  document.getElementById('stat-co2').textContent = fmtNum(cVal);
+  document.getElementById('stat-co2-unit').textContent = cUnit;
+
+  const [wVal, wUnit] = autoScale(totals.water_ml, 'mL');
+  document.getElementById('stat-water').textContent = fmtNum(wVal);
+  document.getElementById('stat-water-unit').textContent = wUnit;
+
+  document.getElementById('stat-cost').textContent = fmtCost(totals.cost_usd);
+
+  // Sort days
+  const days = Object.keys(byDay).sort();
+  const dailyCo2 = days.map(d => +(byDay[d].co2_g * 1000).toPrecision(4));
+  const dailyWater = days.map(d => +(byDay[d].water_ml).toPrecision(4));
+
+  // Sort models by co2
+  const modelEntries = Object.entries(byModel).sort((a,b) => b[1].co2_g - a[1].co2_g);
+  const modelNames = modelEntries.map(([k]) => k);
+  const modelCo2 = modelEntries.map(([,v]) => +(v.co2_g * 1000).toPrecision(4));
+  const modelCost = modelEntries.map(([,v]) => +v.cost_usd.toPrecision(6));
+
+  destroyCharts();
+
+  const barDefaults = (label, data, color) => ({
+    type: 'bar',
+    data: { labels: days, datasets: [{ label, data, backgroundColor: color+'88', borderColor: color, borderWidth: 1, borderRadius: 3 }] },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { ticks: { maxTicksLimit: 10 } }, y: { beginAtZero: true } } }
+  });
+
+  charts.co2 = new Chart(document.getElementById('co2Chart'), barDefaults('CO₂ (mg)', dailyCo2, '#ef4444'));
+  charts.water = new Chart(document.getElementById('waterChart'), barDefaults('Water (mL)', dailyWater, '#22c55e'));
+
+  const doughnutDefaults = (labels, data) => ({
+    type: 'doughnut',
+    data: { labels, datasets: [{ data, backgroundColor: PALETTE, borderWidth: 0 }] },
+    options: { responsive: true, plugins: { legend: { position: 'right', labels: { color: '#e2e8f0', boxWidth: 12, font: { size: 11 } } } } }
+  });
+
+  charts.modelCo2 = new Chart(document.getElementById('modelCo2Chart'), doughnutDefaults(modelNames, modelCo2));
+  charts.modelCost = new Chart(document.getElementById('modelCostChart'), doughnutDefaults(modelNames, modelCost));
+
+  // Per-model table
+  const tbody = document.getElementById('model-tbody');
+  tbody.innerHTML = modelEntries.map(([model, v]) => `
+    <tr>
+      <td><span class="badge badge-blue">${model}</span></td>
+      <td>${v.queries.toLocaleString()}</td>
+      <td>${v.tokens.toLocaleString()}</td>
+      <td>${+(v.energy_wh*1000).toPrecision(4)} mWh</td>
+      <td>${+(v.co2_g*1000).toPrecision(4)} mg</td>
+      <td>${+v.water_ml.toPrecision(4)} mL</td>
+      <td>${fmtCost(v.cost_usd)}</td>
+    </tr>`).join('');
+
+  // Recent queries (last 20)
+  const recent = [...records].sort((a,b) => (b.timestamp||'').localeCompare(a.timestamp||'')).slice(0, 20);
+  const rtbody = document.getElementById('recent-tbody');
+  rtbody.innerHTML = recent.map(r => `
+    <tr>
+      <td>${(r.timestamp||'').substring(0,19)}</td>
+      <td><span class="badge badge-blue">${r.model||'?'}</span></td>
+      <td>${(r.total_tokens||0).toLocaleString()}</td>
+      <td>${+(r.co2_g*1000).toPrecision(4)} mg</td>
+      <td>${+r.water_ml.toPrecision(4)} mL</td>
+      <td>${fmtCost(r.cost_usd||0)}</td>
+    </tr>`).join('');
+
+  document.getElementById('dashboard').style.display = 'block';
+}
+
+// ---- File upload ----
+document.getElementById('file-input').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      const records = data.records || data;
+      if (!Array.isArray(records)) throw new Error('Expected an array or {records:[...]}');
+      document.getElementById('demo-notice').style.display = 'none';
+      renderDashboard(records);
+    } catch(err) {
+      alert('Could not parse file: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+});
+
+// ---- Drag-and-drop ----
+const uploadSection = document.getElementById('upload-section');
+uploadSection.addEventListener('dragover', e => { e.preventDefault(); uploadSection.classList.add('drag-over'); });
+uploadSection.addEventListener('dragleave', () => uploadSection.classList.remove('drag-over'));
+uploadSection.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadSection.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) { document.getElementById('file-input').files = e.dataTransfer.files; document.getElementById('file-input').dispatchEvent(new Event('change')); }
+});
+
+// ---- Demo data ----
+function loadDemoData() {
+  const now = new Date();
+  const records = [];
+  const models = ['gpt-4o', 'gpt-3.5-turbo', 'llama3:8b', 'claude-3-sonnet', 'mistral:7b'];
+  const energyMap = { 'gpt-4o': 0.0039, 'gpt-3.5-turbo': 0.00205, 'llama3:8b': 0.00196, 'claude-3-sonnet': 0.0058, 'mistral:7b': 0.00177 };
+  const costMap   = { 'gpt-4o': [0.005,0.015], 'gpt-3.5-turbo': [0.0005,0.0015], 'llama3:8b': [0,0], 'claude-3-sonnet': [0.003,0.015], 'mistral:7b': [0,0] };
+
+  for (let i = 89; i >= 0; i--) {
+    const day = new Date(now); day.setDate(day.getDate() - i);
+    const queriesThisDay = Math.floor(Math.random() * 8) + 1;
+    for (let q = 0; q < queriesThisDay; q++) {
+      const model = models[Math.floor(Math.random() * models.length)];
+      const inputTokens = Math.floor(Math.random() * 800) + 100;
+      const outputTokens = Math.floor(Math.random() * 500) + 50;
+      const totalTokens = inputTokens + outputTokens;
+      const energyRate = energyMap[model];
+      const energy_wh = (totalTokens / 1000) * energyRate;
+      const co2_g = (energy_wh / 1000) * 386;
+      const water_ml = (energy_wh / 1000) * 1800;
+      const [inRate, outRate] = costMap[model];
+      const cost_usd = (inputTokens/1000)*inRate + (outputTokens/1000)*outRate;
+      const ts = new Date(day); ts.setHours(Math.floor(Math.random()*24), Math.floor(Math.random()*60));
+      records.push({ id: records.length+1, timestamp: ts.toISOString(), user_id:'demo', user_name:'Demo User', model, input_tokens:inputTokens, output_tokens:outputTokens, total_tokens:totalTokens, energy_wh, co2_g, water_ml, cost_usd, chat_id:'demo' });
+    }
+  }
+
+  document.getElementById('demo-notice').style.display = 'block';
+  renderDashboard(records);
+}
+</script>
+</body>
+</html>
