@@ -1,0 +1,26 @@
+services:
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    ports:
+      - "3000:8080"
+    volumes:
+      - open-webui-data:/app/backend/data
+      - ./ai_impact_filter.py:/app/backend/data/functions/ai_impact_filter.py
+      - ./ai_impact_tool.py:/app/backend/data/tools/ai_impact_tool.py
+      - ./model_data.json:/app/backend/data/functions/model_data.json
+    environment:
+      - WEBUI_SECRET_KEY=your_secret_key_here
+    restart: always
+
+  ai-impact-dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.dashboard
+    container_name: ai-impact-dashboard
+    ports:
+      - "8080:80"
+    restart: always
+
+volumes:
+  open-webui-data:

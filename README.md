@@ -33,26 +33,49 @@ Calculations are grounded in peer-reviewed research (see [Scientific Basis](#sci
 
 ## Installation
 
-### 1 — Filter (usage tracker)
+### 🚀 One-Click Deploy (Docker Compose)
+
+The fastest way to get started is using Docker Compose, which deploys Open WebUI and the AI Impact Dashboard as separate services.
+
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/NCC-Open-Innovation-Office/ai-impact-plugin.git
+   cd ai-impact-plugin
+   ```
+2. Start the stack:
+   ```bash
+   docker compose up -d
+   ```
+3. Access the services:
+   - **Open WebUI**: `http://localhost:3000`
+   - **AI Impact Dashboard**: `http://localhost:8080`
+4. In Open WebUI, go to **Workspace → Functions** and **Workspace → Tools** to enable the pre-installed `ai_impact_filter` and `ai_impact_tool`.
+
+---
+
+### 🛠️ Manual Installation
+
+#### 1 — Filter (usage tracker)
 
 1. In Open WebUI, go to **Workspace → Functions → + Create Function**.
 2. Paste the contents of `ai_impact_filter.py`.
 3. Copy `model_data.json` to the same directory as the filter (or the plugin picks up a built-in fallback).
 4. Save and **enable** the filter globally or per-workspace.
 
-### 2 — Tool (dashboard queries)
+#### 2 — Tool (dashboard queries)
 
 1. In Open WebUI, go to **Workspace → Tools → + Create Tool**.
 2. Paste the contents of `ai_impact_tool.py`.
 3. Enable the tool in your model settings.
 4. Ask the AI: *"Show me my AI environmental impact dashboard"* or *"Give me my AI usage summary."*
 
-### 3 — Standalone dashboard
+#### 3 — Standalone dashboard
 
 Export data from the chat:
 > *"Export my AI impact data as JSON"*
 
 Save the output as `data.json`, then open `dashboard.html` in a browser and upload the file (or drag-and-drop it).
+
 
 ---
 

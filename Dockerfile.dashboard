@@ -1,0 +1,6 @@
+FROM nginx:alpine
+
+# Copy the dashboard HTML file to the nginx default page
+COPY dashboard.html /usr/share/nginx/html/index.html
+
+EXPOSE 80
