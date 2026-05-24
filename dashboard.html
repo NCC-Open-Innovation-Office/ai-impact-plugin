@@ -69,6 +69,14 @@
 
   /* Hidden until data loaded */
   #dashboard { display: none; }
+
+  /* Live-data status bar */
+  .live-badge { display: inline-flex; align-items: center; gap: .4rem; background: #14532d33; border: 1px solid #22c55e55; border-radius: 9999px; padding: .25rem .75rem; font-size: .75rem; color: var(--green); }
+  .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+  .offline-badge { background: #78350f33; border-color: #f59e0b55; color: var(--amber); }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+  #live-status { display: none; align-items: center; gap: .75rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  #last-updated { font-size: .75rem; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -82,10 +90,17 @@
   carbon from <a href="https://www.epa.gov/egrid">US EPA eGRID 2022</a>.
 </p>
 
+<div id="live-status">
+  <span id="live-badge" class="live-badge"><span class="live-dot"></span><span id="live-text">Live</span></span>
+  <span id="last-updated"></span>
+  <button class="btn btn-outline" style="padding:.3rem .75rem;font-size:.75rem" onclick="fetchLiveData()">↻ Refresh</button>
+</div>
+
 <!-- Data load section -->
 <div class="upload-section" id="upload-section">
   <h2>📂 Load Your Usage Data</h2>
-  <p>Export your data from Open WebUI by asking the AI: <em>"export my AI impact data as JSON"</em>,<br>
+  <p>When running via Docker Compose, data loads automatically from the live database.<br>
+     To load data manually, export from Open WebUI by asking the AI: <em>"export my AI impact data as JSON"</em>,<br>
      then upload the resulting <code>data.json</code> file below — or load the demo data to explore.</p>
   <input type="file" id="file-input" accept=".json,application/json">
   <button class="btn" onclick="document.getElementById('file-input').click()">Upload data.json</button>
@@ -377,6 +392,38 @@ uploadSection.addEventListener('drop', e => {
   const file = e.dataTransfer.files[0];
   if (file) { document.getElementById('file-input').files = e.dataTransfer.files; document.getElementById('file-input').dispatchEvent(new Event('change')); }
 });
+
+// ---- Live data fetch ----
+let _refreshInterval = null;
+
+async function fetchLiveData() {
+  try {
+    const res = await fetch('/api/data');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    const records = json.records || [];
+
+    document.getElementById('live-badge').className = 'live-badge';
+    document.getElementById('live-text').textContent = records.length === 0 ? 'Live — no data yet' : 'Live';
+    document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString();
+    document.getElementById('live-status').style.display = 'flex';
+
+    if (records.length > 0) {
+      document.getElementById('upload-section').style.display = 'none';
+      document.getElementById('demo-notice').style.display = 'none';
+      renderDashboard(records);
+    }
+
+    if (!_refreshInterval) {
+      _refreshInterval = setInterval(fetchLiveData, 30000);
+    }
+  } catch (_) {
+    // No API server available — stay in file-upload mode, hide the status bar
+    document.getElementById('live-status').style.display = 'none';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', fetchLiveData);
 
 // ---- Demo data ----
 function loadDemoData() {

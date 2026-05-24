@@ -9,6 +9,8 @@ services:
       - ./ai_impact_filter.py:/app/backend/data/functions/ai_impact_filter.py
       - ./ai_impact_tool.py:/app/backend/data/tools/ai_impact_tool.py
       - ./model_data.json:/app/backend/data/functions/model_data.json
+      # Shared volume: the filter writes usage.db here; the dashboard reads it
+      - ai-impact-data:/root/.local/share/ai_impact
     environment:
       - WEBUI_SECRET_KEY=your_secret_key_here
     restart: always
@@ -19,8 +21,14 @@ services:
       dockerfile: Dockerfile.dashboard
     container_name: ai-impact-dashboard
     ports:
-      - "8080:80"
+      - "8080:8080"
+    volumes:
+      # Same named volume, mounted at the path the server expects
+      - ai-impact-data:/data/ai_impact
+    environment:
+      - AI_IMPACT_DB_PATH=/data/ai_impact/usage.db
     restart: always
 
 volumes:
   open-webui-data:
+  ai-impact-data:

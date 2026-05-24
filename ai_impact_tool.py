@@ -1,8 +1,8 @@
 """
 title: AI Impact Dashboard Tool
 author: AI Impact Plugin
-author_url: https://github.com/marshalmiller/ai-impact-plugin
-git_url: https://github.com/marshalmiller/ai-impact-plugin.git
+author_url: https://github.com/NCC-Open-Innovation-Office/ai-impact-plugin
+git_url: https://github.com/NCC-Open-Innovation-Office/ai-impact-plugin.git
 description: >
   Companion tool for the AI Environmental Impact Filter.  Exposes functions
   that an LLM can call to fetch usage statistics and render an HTML dashboard

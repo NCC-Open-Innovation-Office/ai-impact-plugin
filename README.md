@@ -10,7 +10,7 @@ Calculations are grounded in peer-reviewed research (see [Scientific Basis](#sci
 
 | Feature | Description |
 |---------|-------------|
-| 🌱 Real-time footprint | Every assistant reply is annotated with energy, CO₂, water, and cost |
+| 🌱 Real-time footprint | Every assistant reply is annotated with energy, CO₂, water, and cost (WebUI chat only — see [Limitations](#limitations)) |
 | 📊 Dashboard | Interactive HTML dashboard with charts and per-model breakdowns |
 | 🗄️ Persistent storage | All records saved to a local SQLite database |
 | 🔬 Science-backed | Calculations derived from Luccioni et al. (2023) and Li et al. (2023) |
@@ -49,32 +49,51 @@ The fastest way to get started is using Docker Compose, which deploys Open WebUI
 3. Access the services:
    - **Open WebUI**: `http://localhost:3000`
    - **AI Impact Dashboard**: `http://localhost:8080`
-4. In Open WebUI, go to **Workspace → Functions** and **Workspace → Tools** to enable the pre-installed `ai_impact_filter` and `ai_impact_tool`.
+4. Enable the pre-installed plugins:
+   - **Filter**: In Open WebUI, go to **Admin Panel → Functions**, find `ai_impact_filter`:
+     1. **Toggle it ON** — click the pill switch so it turns blue/enabled. Without this the filter is saved but never runs.
+     2. **Click the 🌐 globe icon** — this makes the filter global (applies to every model). Without the globe icon the filter is silently skipped for all normal chats, even if the toggle is on.
+   - **Tool**: Go to **Workspace → Tools**, find `ai_impact_tool`, and enable it in your model's settings.
 
 ---
 
 ### 🛠️ Manual Installation
 
+> **Note:** Filter Functions require admin access. Only Open WebUI administrators can create and manage Functions.
+
 #### 1 — Filter (usage tracker)
 
-1. In Open WebUI, go to **Workspace → Functions → + Create Function**.
-2. Paste the contents of `ai_impact_filter.py`.
+1. In Open WebUI, go to **Admin Panel → Functions → + Create Function**.
+2. Click **Import from URL** and paste:
+   ```
+   https://raw.githubusercontent.com/NCC-Open-Innovation-Office/ai-impact-plugin/main/ai_impact_filter.py
+   ```
+   Alternatively, paste the contents of `ai_impact_filter.py` directly into the code editor.
 3. Copy `model_data.json` to the same directory as the filter (or the plugin picks up a built-in fallback).
-4. Save and **enable** the filter globally or per-workspace.
+4. Save the function, then do **both** of the following — the filter will not run without either step:
+   - **Toggle it ON** — click the pill switch next to the function name so it turns blue/enabled.
+   - **Click the 🌐 globe icon** — this makes it global. Without the globe icon, the filter only applies to models you manually configure it on and is silently skipped for all other chats.
 
 #### 2 — Tool (dashboard queries)
 
 1. In Open WebUI, go to **Workspace → Tools → + Create Tool**.
-2. Paste the contents of `ai_impact_tool.py`.
-3. Enable the tool in your model settings.
-4. Ask the AI: *"Show me my AI environmental impact dashboard"* or *"Give me my AI usage summary."*
+2. Click **Import from URL** and paste:
+   ```
+   https://raw.githubusercontent.com/NCC-Open-Innovation-Office/ai-impact-plugin/main/ai_impact_tool.py
+   ```
+   Alternatively, paste the contents of `ai_impact_tool.py` directly into the code editor.
+3. Enable the tool in your model's settings (Workspace → Models → edit your model → Tools).
+4. Make sure **Native (Agentic) function calling** is enabled for the model (Admin Panel → Settings → Models → Function Calling → `Native`).
+5. Ask the AI: *"Give me my AI usage summary"* or *"Export my AI impact data as JSON."*
+
+> **Note on the HTML dashboard tool:** `get_dashboard_html` returns the full HTML source as a text string. It will not render as a visual page inside the chat window. Use `get_impact_summary` for an in-chat summary table, and use the standalone dashboard (below) for the full visual experience.
 
 #### 3 — Standalone dashboard
 
 Export data from the chat:
 > *"Export my AI impact data as JSON"*
 
-Save the output as `data.json`, then open `dashboard.html` in a browser and upload the file (or drag-and-drop it).
+Copy the JSON from the response, save it as `data.json`, then open `dashboard.html` in a browser and upload the file (or drag-and-drop it).
 
 
 ---
@@ -89,6 +108,17 @@ Both the filter and tool expose valves you can adjust in Open WebUI:
 | `show_impact_in_response` | `true` | Append footprint summary to each response |
 | `carbon_intensity_g_co2_per_kwh` | `386.0` | Electricity grid carbon intensity (g CO₂/kWh) |
 | `water_usage_effectiveness_l_per_kwh` | `1.8` | Data-centre WUE coefficient (L/kWh) |
+
+---
+
+## Limitations
+
+| Limitation | Detail |
+|------------|--------|
+| WebUI chat only | The filter's `outlet()` hook only fires for Open WebUI chat requests. Direct API calls to `/api/chat/completions` (e.g. from curl, Continue.dev, or other integrations) are **not tracked** unless the caller also posts to `/api/chat/completed`. |
+| Approximate token counts | The outlet body does not include the upstream provider's token-usage stats. Token counts are estimated using the approximation 1 token ≈ 4 characters. Energy, CO₂, water, and cost figures are proportionally approximate. |
+| `chat_id` may be empty | The `chat_id` field recorded in the database is read from the request body and may not always be populated, depending on the client. |
+| HTML dashboard not rendered in chat | `get_dashboard_html` returns raw HTML. It will not render visually inside the chat window; use the standalone `dashboard.html` file instead. |
 
 ---
 

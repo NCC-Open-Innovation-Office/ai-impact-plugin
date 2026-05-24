@@ -1,8 +1,8 @@
 """
 title: AI Environmental Impact Filter
 author: AI Impact Plugin
-author_url: https://github.com/marshalmiller/ai-impact-plugin
-git_url: https://github.com/marshalmiller/ai-impact-plugin.git
+author_url: https://github.com/NCC-Open-Innovation-Office/ai-impact-plugin
+git_url: https://github.com/NCC-Open-Innovation-Office/ai-impact-plugin.git
 description: >
   Tracks every AI model invocation and calculates the environmental cost of
   each prompt: energy (Wh), CO₂ emissions (g), water usage (mL), and USD cost.
@@ -297,7 +297,7 @@ def insert_record(
 # ---------------------------------------------------------------------------
 
 
-def _format_impact_summary(impact: dict, model: str) -> str:
+def _format_impact_summary(impact: dict) -> str:
     """Return a compact markdown-formatted impact summary string."""
     return (
         "\n\n---\n"
@@ -305,8 +305,7 @@ def _format_impact_summary(impact: dict, model: str) -> str:
         f"⚡ Energy: `{impact['energy_wh'] * 1000:.4f} mWh`  \n"
         f"☁️ CO₂: `{impact['co2_g'] * 1000:.4f} mg`  \n"
         f"💧 Water: `{impact['water_ml']:.4f} mL`  \n"
-        f"💰 Cost: `${impact['cost_usd']:.6f}`  \n"
-        f"*Model: {model} — [methodology](https://arxiv.org/abs/2311.16863)*"
+        f"💰 Cost: `${impact['cost_usd']:.6f}`"
     )
 
 
@@ -426,7 +425,7 @@ class Filter:
             # ---- Annotate response --------------------------------------
             if self.valves.show_impact_in_response:
                 messages: list = body.get("messages", [])
-                summary = _format_impact_summary(impact, model)
+                summary = _format_impact_summary(impact)
                 for i in range(len(messages) - 1, -1, -1):
                     if messages[i].get("role") == "assistant":
                         original = messages[i].get("content", "")
