@@ -1,0 +1,63 @@
+# docker-compose.prod.yaml — Production deployment using pre-built images.
+#
+# The ai-impact-dashboard image is pulled from GHCR instead of being built
+# locally.  Everything else is identical to docker-compose.yaml.
+#
+# Usage:
+#   cp .env.example .env   # fill in ADMIN_EMAIL, ADMIN_PASSWORD, WEBUI_SECRET_KEY
+#   docker compose -f docker-compose.prod.yaml up -d
+
+services:
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    ports:
+      - "3000:8080"
+    volumes:
+      - open-webui-data:/app/backend/data
+      - ./model_data.json:/app/backend/data/functions/model_data.json
+      # Shared volume: the filter writes usage.db here; the dashboard reads it
+      - ai-impact-data:/root/.local/share/ai_impact
+    environment:
+      - WEBUI_SECRET_KEY=${WEBUI_SECRET_KEY:-your_secret_key_here}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    restart: always
+
+  open-webui-setup:
+    image: python:3.12-slim
+    container_name: open-webui-setup
+    depends_on:
+      open-webui:
+        condition: service_healthy
+    volumes:
+      - ./setup.py:/scripts/setup.py:ro
+      - ./ai_impact_filter.py:/scripts/ai_impact_filter.py:ro
+      - ./ai_impact_tool.py:/scripts/ai_impact_tool.py:ro
+    environment:
+      - WEBUI_URL=http://open-webui:8080
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - ADMIN_NAME=${ADMIN_NAME:-Admin}
+    command: ["python3", "/scripts/setup.py"]
+    restart: "no"
+
+  ai-impact-dashboard:
+    image: ghcr.io/ncc-open-innovation-office/ai-impact-dashboard:latest
+    container_name: ai-impact-dashboard
+    ports:
+      - "8080:8080"
+    volumes:
+      # Same named volume, mounted at the path the server expects
+      - ai-impact-data:/data/ai_impact
+    environment:
+      - AI_IMPACT_DB_PATH=/data/ai_impact/usage.db
+    restart: always
+
+volumes:
+  open-webui-data:
+  ai-impact-data:
