@@ -1,1 +1,14 @@
 /.vscode
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+
+# Env / secrets
+.env
+
+# Pytest
+.pytest_cache/
+

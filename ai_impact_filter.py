@@ -190,18 +190,50 @@ def estimate_tokens(text: str) -> int:
 
 def _extract_usage(body: dict) -> tuple[int, int]:
     """
-    Extract (input_tokens, output_tokens) from an Open WebUI response body.
+    Extract (input_tokens, output_tokens) from an Open WebUI outlet body.
 
-    Falls back to character-based estimation when ``usage`` is absent.
+    Priority order
+    --------------
+    1. ``body["usage"]["prompt_tokens"]`` / ``completion_tokens``
+       — OpenAI and compatible providers.
+    2. ``body["usage"]["input_tokens"]`` / ``output_tokens``
+       — Anthropic Claude native format.
+    3. ``body["usage"]["prompt_eval_count"]`` / ``eval_count``
+       — Ollama native format when forwarded inside the usage object.
+    4. ``body["prompt_eval_count"]`` / ``eval_count``
+       — Ollama native format at the top level of the body.
+    5. Character-based estimation (1 token ≈ 4 chars) using the messages list.
+       Only used when the provider returns no token counts, which can happen
+       with some streaming configurations.
     """
     usage = body.get("usage") or {}
-    if usage:
-        prompt_tokens = int(usage.get("prompt_tokens", 0))
-        completion_tokens = int(usage.get("completion_tokens", 0))
-        if prompt_tokens or completion_tokens:
-            return prompt_tokens, completion_tokens
 
-    # Fallback: count characters in the messages list
+    if usage:
+        # 1. OpenAI / compatible
+        prompt = int(usage.get("prompt_tokens") or 0)
+        completion = int(usage.get("completion_tokens") or 0)
+        if prompt or completion:
+            return prompt, completion
+
+        # 2. Anthropic native
+        prompt = int(usage.get("input_tokens") or 0)
+        completion = int(usage.get("output_tokens") or 0)
+        if prompt or completion:
+            return prompt, completion
+
+        # 3. Ollama native inside usage object
+        prompt = int(usage.get("prompt_eval_count") or 0)
+        completion = int(usage.get("eval_count") or 0)
+        if prompt or completion:
+            return prompt, completion
+
+    # 4. Ollama native at top level of body
+    prompt = int(body.get("prompt_eval_count") or 0)
+    completion = int(body.get("eval_count") or 0)
+    if prompt or completion:
+        return prompt, completion
+
+    # 5. Fallback: character-based estimation from the messages list
     messages = body.get("messages", [])
     input_text = " ".join(
         str(m.get("content", ""))

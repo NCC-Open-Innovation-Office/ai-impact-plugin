@@ -102,8 +102,6 @@ docker logs open-webui-setup
 4. Make sure **Native (Agentic) function calling** is enabled for the model (Admin Panel → Settings → Models → Function Calling → `Native`).
 5. Ask the AI: *"Give me my AI usage summary"* or *"Export my AI impact data as JSON."*
 
-> **Note on the HTML dashboard tool:** `get_dashboard_html` returns the full HTML source as a text string. It will not render as a visual page inside the chat window. Use `get_impact_summary` for an in-chat summary table, and use the standalone dashboard (below) for the full visual experience.
-
 #### 3 — Standalone dashboard
 
 Export data from the chat:
@@ -132,9 +130,9 @@ Both the filter and tool expose valves you can adjust in Open WebUI:
 | Limitation | Detail |
 |------------|--------|
 | WebUI chat only | The filter's `outlet()` hook only fires for Open WebUI chat requests. Direct API calls to `/api/chat/completions` (e.g. from curl, Continue.dev, or other integrations) are **not tracked** unless the caller also posts to `/api/chat/completed`. |
-| Approximate token counts | The outlet body does not include the upstream provider's token-usage stats. Token counts are estimated using the approximation 1 token ≈ 4 characters. Energy, CO₂, water, and cost figures are proportionally approximate. |
+| Token count accuracy | The filter reads exact token counts from the provider response when available: OpenAI/compatible (`usage.prompt_tokens` / `completion_tokens`), Anthropic (`usage.input_tokens` / `output_tokens`), and Ollama (`prompt_eval_count` / `eval_count`). It falls back to character-based estimation (1 token ≈ 4 chars) only when no usage field is returned — which can occur with some streaming configurations. |
 | `chat_id` may be empty | The `chat_id` field recorded in the database is read from the request body and may not always be populated, depending on the client. |
-| HTML dashboard not rendered in chat | `get_dashboard_html` returns raw HTML. It will not render visually inside the chat window; use the standalone `dashboard.html` file instead. |
+
 
 ---
 
