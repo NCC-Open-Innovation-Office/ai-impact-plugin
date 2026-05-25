@@ -297,7 +297,7 @@ def insert_record(
 # ---------------------------------------------------------------------------
 
 
-def _format_impact_summary(impact: dict) -> str:
+def _format_impact_summary(impact: dict, model: str) -> str:
     """Return a compact markdown-formatted impact summary string."""
     return (
         "\n\n---\n"
@@ -305,7 +305,8 @@ def _format_impact_summary(impact: dict) -> str:
         f"⚡ Energy: `{impact['energy_wh'] * 1000:.4f} mWh`  \n"
         f"☁️ CO₂: `{impact['co2_g'] * 1000:.4f} mg`  \n"
         f"💧 Water: `{impact['water_ml']:.4f} mL`  \n"
-        f"💰 Cost: `${impact['cost_usd']:.6f}`"
+        f"💰 Cost: `${impact['cost_usd']:.6f}`  \n"
+        f"*Model: {model} — [methodology](https://arxiv.org/abs/2311.16863)*"
     )
 
 
@@ -425,7 +426,7 @@ class Filter:
             # ---- Annotate response --------------------------------------
             if self.valves.show_impact_in_response:
                 messages: list = body.get("messages", [])
-                summary = _format_impact_summary(impact)
+                summary = _format_impact_summary(impact, model)
                 for i in range(len(messages) - 1, -1, -1):
                     if messages[i].get("role") == "assistant":
                         original = messages[i].get("content", "")
