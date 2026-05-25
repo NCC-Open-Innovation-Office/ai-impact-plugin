@@ -443,7 +443,7 @@ function loadDemoData() {
       const totalTokens = inputTokens + outputTokens;
       const energyRate = energyMap[model];
       const energy_wh = (totalTokens / 1000) * energyRate;
-      const co2_g = (energy_wh / 1000) * 386;
+      const co2_g = (energy_wh / 1000) * 386; // demo only — real data uses the intensity recorded at query time
       const water_ml = (energy_wh / 1000) * 1800;
       const [inRate, outRate] = costMap[model];
       const cost_usd = (inputTokens/1000)*inRate + (outputTokens/1000)*outRate;

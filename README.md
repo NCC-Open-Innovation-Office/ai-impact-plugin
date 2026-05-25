@@ -120,8 +120,10 @@ Both the filter and tool expose valves you can adjust in Open WebUI:
 |-------|---------|-------------|
 | `db_path` | `~/.local/share/ai_impact/usage.db` | SQLite database location |
 | `show_impact_in_response` | `true` | Append footprint summary to each response |
-| `carbon_intensity_g_co2_per_kwh` | `386.0` | Electricity grid carbon intensity (g CO₂/kWh) |
+| `carbon_intensity_g_co2_per_kwh` | `386.0` | Fallback grid carbon intensity (g CO₂/kWh) used when no Electricity Maps key is set |
 | `water_usage_effectiveness_l_per_kwh` | `1.8` | Data-centre WUE coefficient (L/kWh) |
+| `electricity_maps_api_key` | *(empty)* | [Electricity Maps](https://api.electricitymap.org) API key for real-time marginal carbon intensity (SCI methodology). Free tier available. |
+| `electricity_maps_zone` | `US-MIDA` | Electricity Maps zone for the data centre serving your AI provider (e.g. `IE`, `FR`, `US-CAL-CISO`). [Full zone list](https://api.electricitymap.org/v3/zones). |
 
 ---
 
@@ -152,10 +154,19 @@ Water Usage Effectiveness (WUE) = **1.8 L/kWh** (average across major cloud data
 Formula: `water_mL = (energy_Wh / 1000) × 1.8 × 1000`
 
 ### Carbon emissions
-> **US EPA eGRID 2022** — [epa.gov/egrid](https://www.epa.gov/egrid/download-data)
 
-National US average annual carbon intensity: **386 g CO₂/kWh**.  
-Formula: `co2_g = (energy_Wh / 1000) × 386`
+By default the plugin uses a static fallback:
+
+> **US EPA eGRID 2022** — [epa.gov/egrid](https://www.epa.gov/egrid/download-data)  
+> National US average annual carbon intensity: **386 g CO₂/kWh**  
+> Formula: `co2_g = (energy_Wh / 1000) × 386`
+
+When an `electricity_maps_api_key` is configured the plugin switches to the **Green Software Foundation Software Carbon Intensity (SCI)** methodology:
+
+> **Green Software Foundation SCI Specification** — [sci.greensoftware.foundation](https://sci.greensoftware.foundation)  
+> Fetches live *marginal* carbon intensity for the configured grid zone from the [Electricity Maps API](https://api.electricitymap.org) (g CO₂eq/kWh), refreshed hourly.  
+> Marginal intensity reflects the carbon cost of the *next unit of demand* on the grid — more accurate than an annual average, especially when renewables are actively displacing gas.  
+> Falls back to the EPA eGRID value on any API error.
 
 ---
 

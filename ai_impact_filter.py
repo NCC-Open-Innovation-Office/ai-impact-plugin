@@ -40,6 +40,8 @@ import os
 import re
 import sqlite3
 import time
+import urllib.error
+import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Awaitable, Callable, Optional
@@ -50,8 +52,9 @@ from pydantic import BaseModel, Field
 # Scientific constants (see module docstring for references)
 # ---------------------------------------------------------------------------
 
-CARBON_INTENSITY_G_CO2_PER_KWH: float = 386.0   # US EPA eGRID 2022
+CARBON_INTENSITY_G_CO2_PER_KWH: float = 386.0   # US EPA eGRID 2022 (fallback)
 WATER_L_PER_KWH: float = 1.8                     # Li et al. (2023) WUE
+_INTENSITY_CACHE_TTL_S: int = 3600               # refresh Electricity Maps data hourly
 BLOOM_176B_WH_PER_1K_TOKENS: float = 0.025       # Luccioni et al. (2023)
 SCALING_EXPONENT: float = 0.8                     # Luccioni et al. (2023)
 CLOUD_EFFICIENCY_FACTOR: float = 0.5             # cloud vs. local deployment
@@ -387,15 +390,69 @@ class Filter:
                 "Default: 1.8 L/kWh (Li et al. 2023 average)."
             ),
         )
+        electricity_maps_api_key: str = Field(
+            default="",
+            description=(
+                "Electricity Maps API key for real-time marginal carbon intensity "
+                "(Green Software Foundation SCI methodology). "
+                "Get a free key at https://api.electricitymap.org. "
+                "Leave empty to use the static carbon_intensity_g_co2_per_kwh value."
+            ),
+        )
+        electricity_maps_zone: str = Field(
+            default="US-MIDA",
+            description=(
+                "Electricity Maps zone code for the data-centre region serving your "
+                "AI provider. Examples: US-MIDA (PJM / Mid-Atlantic), "
+                "US-CAL-CISO (California), IE (Ireland), FR (France), "
+                "DE (Germany), GB (Great Britain), SG (Singapore). "
+                "Full list: https://api.electricitymap.org/v3/zones"
+            ),
+        )
 
     def __init__(self):
         self.valves = self.Valves()
         self._model_data: dict[str, dict] = _load_model_data()
         self._conn: Optional[sqlite3.Connection] = None
+        self._intensity_cache: dict = {}  # {"value": float, "ts": float}
 
     # ------------------------------------------------------------------
     # Internal helpers
     # ------------------------------------------------------------------
+
+    def _get_carbon_intensity(self) -> float:
+        """
+        Return the carbon intensity in g CO₂eq/kWh.
+
+        When an Electricity Maps API key is configured, fetches the live
+        marginal intensity for the configured zone (Green Software Foundation
+        SCI methodology) and caches the result for one hour.  Falls back to
+        the static ``carbon_intensity_g_co2_per_kwh`` valve value on any
+        error or when no key is set.
+        """
+        if not self.valves.electricity_maps_api_key:
+            return self.valves.carbon_intensity_g_co2_per_kwh
+
+        now = time.time()
+        if self._intensity_cache and (now - self._intensity_cache.get("ts", 0)) < _INTENSITY_CACHE_TTL_S:
+            return self._intensity_cache["value"]
+
+        try:
+            url = (
+                "https://api.electricitymap.org/v3/carbon-intensity/latest"
+                f"?zone={self.valves.electricity_maps_zone}"
+            )
+            req = urllib.request.Request(
+                url,
+                headers={"auth-token": self.valves.electricity_maps_api_key},
+            )
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                data = json.loads(resp.read())
+            intensity = float(data["carbonIntensity"])
+            self._intensity_cache = {"value": intensity, "ts": now}
+            return intensity
+        except Exception:
+            return self.valves.carbon_intensity_g_co2_per_kwh
 
     def _get_conn(self) -> sqlite3.Connection:
         if self._conn is None:
@@ -434,7 +491,7 @@ class Filter:
                 input_tokens=input_tokens,
                 output_tokens=output_tokens,
                 model_data=self._model_data,
-                carbon_intensity=self.valves.carbon_intensity_g_co2_per_kwh,
+                carbon_intensity=self._get_carbon_intensity(),
                 water_wue=self.valves.water_usage_effectiveness_l_per_kwh,
             )
 
