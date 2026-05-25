@@ -215,7 +215,7 @@ def _render_dashboard_html(
 <h1>🌱 AI Environmental Impact Dashboard</h1>
 <p class="subtitle">
   All-time usage across every AI model tracked by the
-  <a href="https://github.com/marshalmiller/ai-impact-plugin">AI Impact Filter</a>.
+  <a href="https://github.com/NCC-Open-Innovation-Office/ai-impact-plugin">AI Impact Filter</a>.
   Methodology: energy from
   <a href="https://arxiv.org/abs/2311.16863">Luccioni et al. (2023)</a>;
   water from <a href="https://arxiv.org/abs/2304.03271">Li et al. (2023)</a>;
