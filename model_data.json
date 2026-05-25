@@ -2,17 +2,22 @@
   "metadata": {
     "version": "1.0.0",
     "description": "AI model energy and cost data for environmental impact calculations",
-    "last_updated": "2024-01-01",
+    "last_updated": "2026-05-24",
+    "data_source_legend": {
+      "scaled_estimate": "Energy value derived by scaling the BLOOM-176B measured baseline (0.025 Wh/1k tokens) using (params/176B)^0.8. Parameter counts for closed-source models are community estimates; no cloud-provider inference measurements are publicly available.",
+      "measured": "Energy value sourced from a published direct measurement study."
+    },
     "energy_unit": "Wh per 1000 tokens (input + output combined)",
     "cost_unit": "USD per 1000 tokens",
     "scientific_basis": {
       "energy": {
         "paper": "Power Hungry Processing: Watts Driving the Cost of AI Deployment?",
-        "authors": "Luccioni, A.S., Viguier, S., & Ligozat, A.L.",
-        "year": 2023,
+        "authors": "Luccioni, A.S., Jernite, Y., & Strubell, E.",
+        "year": 2024,
+        "venue": "ACM Conference on Fairness, Accountability, and Transparency (FACcT '24)",
         "arxiv": "2311.16863",
-        "doi": "10.1145/3627673.3679071",
-        "methodology": "Measured energy consumption of BLOOM-176B (0.025 Wh/1k tokens on 8xA100 GPUs). Other model energies scaled by (params/176B)^0.8, with 0.5x efficiency factor for cloud-optimised API deployments."
+        "doi": "10.1145/3630106.3658542",
+        "methodology": "Directly measured BLOOM-176B at 0.025 Wh/1k tokens on 8\u00d7A100 GPUs. All other model values in this file are scaled estimates using (params/176B)^0.8, with an additional 0.5\u00d7 factor for cloud-optimised deployments. Parameter counts for closed-source models (GPT-4, Claude, Gemini) are community estimates; no cloud-provider inference measurements are publicly available."
       },
       "water": {
         "paper": "Making AI Less 'Thirsty': Uncovering and Addressing the Secret Water Footprint of AI Models",
@@ -45,7 +50,8 @@
       "energy_wh_per_1k_tokens": 0.0109,
       "input_cost_usd_per_1k_tokens": 0.0300,
       "output_cost_usd_per_1k_tokens": 0.0600,
-      "notes": "Energy estimated via (1000/176)^0.8 * 0.025 * 0.5 (cloud factor). Cost: OpenAI pricing as of 2024."
+      "notes": "Energy estimated via (1000/176)^0.8 * 0.025 * 0.5 (cloud factor). Cost: OpenAI pricing as of 2024.",
+      "data_source": "scaled_estimate"
     },
     "gpt-4-turbo": {
       "display_name": "GPT-4 Turbo",
@@ -55,7 +61,8 @@
       "energy_wh_per_1k_tokens": 0.0109,
       "input_cost_usd_per_1k_tokens": 0.0100,
       "output_cost_usd_per_1k_tokens": 0.0300,
-      "notes": "Same architecture as GPT-4 with efficiency improvements. OpenAI pricing as of 2024."
+      "notes": "Same architecture as GPT-4 with efficiency improvements. OpenAI pricing as of 2024.",
+      "data_source": "scaled_estimate"
     },
     "gpt-4o": {
       "display_name": "GPT-4o",
@@ -65,7 +72,8 @@
       "energy_wh_per_1k_tokens": 0.0039,
       "input_cost_usd_per_1k_tokens": 0.0050,
       "output_cost_usd_per_1k_tokens": 0.0150,
-      "notes": "Multimodal model, estimated ~200B effective params. OpenAI pricing as of 2024."
+      "notes": "Multimodal model, estimated ~200B effective params. OpenAI pricing as of 2024.",
+      "data_source": "scaled_estimate"
     },
     "gpt-4o-mini": {
       "display_name": "GPT-4o Mini",
@@ -75,7 +83,8 @@
       "energy_wh_per_1k_tokens": 0.00205,
       "input_cost_usd_per_1k_tokens": 0.00015,
       "output_cost_usd_per_1k_tokens": 0.00060,
-      "notes": "Small efficient model. OpenAI pricing as of 2024."
+      "notes": "Small efficient model. OpenAI pricing as of 2024.",
+      "data_source": "scaled_estimate"
     },
     "gpt-3.5-turbo": {
       "display_name": "GPT-3.5 Turbo",
@@ -85,7 +94,8 @@
       "energy_wh_per_1k_tokens": 0.00205,
       "input_cost_usd_per_1k_tokens": 0.00050,
       "output_cost_usd_per_1k_tokens": 0.00150,
-      "notes": "Estimated ~20B effective params after distillation. OpenAI pricing as of 2024."
+      "notes": "Estimated ~20B effective params after distillation. OpenAI pricing as of 2024.",
+      "data_source": "scaled_estimate"
     },
     "claude-3-opus": {
       "display_name": "Claude 3 Opus",
@@ -95,7 +105,8 @@
       "energy_wh_per_1k_tokens": 0.0124,
       "input_cost_usd_per_1k_tokens": 0.0150,
       "output_cost_usd_per_1k_tokens": 0.0750,
-      "notes": "Largest Claude model. Energy: (175/176)^0.8 * 0.025 * 0.5. Anthropic pricing as of 2024."
+      "notes": "Largest Claude model. Energy: (175/176)^0.8 * 0.025 * 0.5. Anthropic pricing as of 2024.",
+      "data_source": "scaled_estimate"
     },
     "claude-3-sonnet": {
       "display_name": "Claude 3 Sonnet",
@@ -105,7 +116,8 @@
       "energy_wh_per_1k_tokens": 0.0058,
       "input_cost_usd_per_1k_tokens": 0.0030,
       "output_cost_usd_per_1k_tokens": 0.0150,
-      "notes": "Mid-tier Claude model. Energy: (70/176)^0.8 * 0.025 * 0.5. Anthropic pricing as of 2024."
+      "notes": "Mid-tier Claude model. Energy: (70/176)^0.8 * 0.025 * 0.5. Anthropic pricing as of 2024.",
+      "data_source": "scaled_estimate"
     },
     "claude-3-5-sonnet": {
       "display_name": "Claude 3.5 Sonnet",
@@ -115,7 +127,8 @@
       "energy_wh_per_1k_tokens": 0.0058,
       "input_cost_usd_per_1k_tokens": 0.0030,
       "output_cost_usd_per_1k_tokens": 0.0150,
-      "notes": "Improved Sonnet. Energy estimate same tier. Anthropic pricing as of 2024."
+      "notes": "Improved Sonnet. Energy estimate same tier. Anthropic pricing as of 2024.",
+      "data_source": "scaled_estimate"
     },
     "claude-3-haiku": {
       "display_name": "Claude 3 Haiku",
@@ -125,7 +138,8 @@
       "energy_wh_per_1k_tokens": 0.00205,
       "input_cost_usd_per_1k_tokens": 0.00025,
       "output_cost_usd_per_1k_tokens": 0.00125,
-      "notes": "Fastest Claude model. Anthropic pricing as of 2024."
+      "notes": "Fastest Claude model. Anthropic pricing as of 2024.",
+      "data_source": "scaled_estimate"
     },
     "llama3:70b": {
       "display_name": "Llama 3 70B",
@@ -135,7 +149,8 @@
       "energy_wh_per_1k_tokens": 0.0117,
       "input_cost_usd_per_1k_tokens": 0.0,
       "output_cost_usd_per_1k_tokens": 0.0,
-      "notes": "Local deployment, no cloud efficiency factor. Energy: (70/176)^0.8 * 0.025."
+      "notes": "Local deployment, no cloud efficiency factor. Energy: (70/176)^0.8 * 0.025.",
+      "data_source": "scaled_estimate"
     },
     "llama3:8b": {
       "display_name": "Llama 3 8B",
@@ -145,7 +160,8 @@
       "energy_wh_per_1k_tokens": 0.00196,
       "input_cost_usd_per_1k_tokens": 0.0,
       "output_cost_usd_per_1k_tokens": 0.0,
-      "notes": "Local deployment. Energy: (8/176)^0.8 * 0.025."
+      "notes": "Local deployment. Energy: (8/176)^0.8 * 0.025.",
+      "data_source": "scaled_estimate"
     },
     "llama2:70b": {
       "display_name": "Llama 2 70B",
@@ -155,7 +171,8 @@
       "energy_wh_per_1k_tokens": 0.0117,
       "input_cost_usd_per_1k_tokens": 0.0,
       "output_cost_usd_per_1k_tokens": 0.0,
-      "notes": "Local deployment. Energy: (70/176)^0.8 * 0.025."
+      "notes": "Local deployment. Energy: (70/176)^0.8 * 0.025.",
+      "data_source": "scaled_estimate"
     },
     "llama2:13b": {
       "display_name": "Llama 2 13B",
@@ -165,7 +182,8 @@
       "energy_wh_per_1k_tokens": 0.00296,
       "input_cost_usd_per_1k_tokens": 0.0,
       "output_cost_usd_per_1k_tokens": 0.0,
-      "notes": "Local deployment. Energy: (13/176)^0.8 * 0.025."
+      "notes": "Local deployment. Energy: (13/176)^0.8 * 0.025.",
+      "data_source": "scaled_estimate"
     },
     "llama2:7b": {
       "display_name": "Llama 2 7B",
@@ -175,7 +193,8 @@
       "energy_wh_per_1k_tokens": 0.00177,
       "input_cost_usd_per_1k_tokens": 0.0,
       "output_cost_usd_per_1k_tokens": 0.0,
-      "notes": "Local deployment. Energy: (7/176)^0.8 * 0.025."
+      "notes": "Local deployment. Energy: (7/176)^0.8 * 0.025.",
+      "data_source": "scaled_estimate"
     },
     "mistral:7b": {
       "display_name": "Mistral 7B",
@@ -185,7 +204,8 @@
       "energy_wh_per_1k_tokens": 0.00177,
       "input_cost_usd_per_1k_tokens": 0.0,
       "output_cost_usd_per_1k_tokens": 0.0,
-      "notes": "Local deployment. Energy: (7/176)^0.8 * 0.025."
+      "notes": "Local deployment. Energy: (7/176)^0.8 * 0.025.",
+      "data_source": "scaled_estimate"
     },
     "mistral-small": {
       "display_name": "Mistral Small",
@@ -195,7 +215,8 @@
       "energy_wh_per_1k_tokens": 0.00211,
       "input_cost_usd_per_1k_tokens": 0.0020,
       "output_cost_usd_per_1k_tokens": 0.0060,
-      "notes": "Mistral API pricing as of 2024."
+      "notes": "Mistral API pricing as of 2024.",
+      "data_source": "scaled_estimate"
     },
     "mistral-medium": {
       "display_name": "Mistral Medium",
@@ -205,7 +226,8 @@
       "energy_wh_per_1k_tokens": 0.00488,
       "input_cost_usd_per_1k_tokens": 0.0027,
       "output_cost_usd_per_1k_tokens": 0.0081,
-      "notes": "Mistral API pricing as of 2024."
+      "notes": "Mistral API pricing as of 2024.",
+      "data_source": "scaled_estimate"
     },
     "mistral-large": {
       "display_name": "Mistral Large",
@@ -215,7 +237,8 @@
       "energy_wh_per_1k_tokens": 0.0092,
       "input_cost_usd_per_1k_tokens": 0.0080,
       "output_cost_usd_per_1k_tokens": 0.0240,
-      "notes": "Mistral API pricing as of 2024."
+      "notes": "Mistral API pricing as of 2024.",
+      "data_source": "scaled_estimate"
     },
     "mixtral:8x7b": {
       "display_name": "Mixtral 8x7B",
@@ -225,7 +248,8 @@
       "energy_wh_per_1k_tokens": 0.00255,
       "input_cost_usd_per_1k_tokens": 0.0,
       "output_cost_usd_per_1k_tokens": 0.0,
-      "notes": "MoE model with ~12B active params per forward pass. Local deployment."
+      "notes": "MoE model with ~12B active params per forward pass. Local deployment.",
+      "data_source": "scaled_estimate"
     },
     "gemma:7b": {
       "display_name": "Gemma 7B",
@@ -235,7 +259,8 @@
       "energy_wh_per_1k_tokens": 0.00177,
       "input_cost_usd_per_1k_tokens": 0.0,
       "output_cost_usd_per_1k_tokens": 0.0,
-      "notes": "Local deployment."
+      "notes": "Local deployment.",
+      "data_source": "scaled_estimate"
     },
     "gemma:2b": {
       "display_name": "Gemma 2B",
@@ -245,7 +270,8 @@
       "energy_wh_per_1k_tokens": 0.000663,
       "input_cost_usd_per_1k_tokens": 0.0,
       "output_cost_usd_per_1k_tokens": 0.0,
-      "notes": "Local deployment. Energy: (2/176)^0.8 * 0.025."
+      "notes": "Local deployment. Energy: (2/176)^0.8 * 0.025.",
+      "data_source": "scaled_estimate"
     },
     "phi3": {
       "display_name": "Phi-3",
@@ -255,7 +281,8 @@
       "energy_wh_per_1k_tokens": 0.00109,
       "input_cost_usd_per_1k_tokens": 0.0,
       "output_cost_usd_per_1k_tokens": 0.0,
-      "notes": "Small but capable model. Local deployment."
+      "notes": "Small but capable model. Local deployment.",
+      "data_source": "scaled_estimate"
     },
     "phi3:medium": {
       "display_name": "Phi-3 Medium",
@@ -265,7 +292,8 @@
       "energy_wh_per_1k_tokens": 0.00309,
       "input_cost_usd_per_1k_tokens": 0.0,
       "output_cost_usd_per_1k_tokens": 0.0,
-      "notes": "Medium variant. Local deployment."
+      "notes": "Medium variant. Local deployment.",
+      "data_source": "scaled_estimate"
     },
     "gemini-1.5-pro": {
       "display_name": "Gemini 1.5 Pro",
@@ -275,7 +303,8 @@
       "energy_wh_per_1k_tokens": 0.0140,
       "input_cost_usd_per_1k_tokens": 0.0035,
       "output_cost_usd_per_1k_tokens": 0.0105,
-      "notes": "Google pricing as of 2024."
+      "notes": "Google pricing as of 2024.",
+      "data_source": "scaled_estimate"
     },
     "gemini-1.5-flash": {
       "display_name": "Gemini 1.5 Flash",
@@ -285,7 +314,8 @@
       "energy_wh_per_1k_tokens": 0.0063,
       "input_cost_usd_per_1k_tokens": 0.00035,
       "output_cost_usd_per_1k_tokens": 0.00105,
-      "notes": "Faster, lighter Gemini model. Google pricing as of 2024."
+      "notes": "Faster, lighter Gemini model. Google pricing as of 2024.",
+      "data_source": "scaled_estimate"
     },
     "default": {
       "display_name": "Unknown Model",
@@ -295,7 +325,8 @@
       "energy_wh_per_1k_tokens": 0.005,
       "input_cost_usd_per_1k_tokens": 0.001,
       "output_cost_usd_per_1k_tokens": 0.002,
-      "notes": "Conservative default for unknown models."
+      "notes": "Conservative default for unknown models.",
+      "data_source": "scaled_estimate"
     }
   }
 }

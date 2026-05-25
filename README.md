@@ -134,6 +134,7 @@ Both the filter and tool expose valves you can adjust in Open WebUI:
 | WebUI chat only | The filter's `outlet()` hook only fires for Open WebUI chat requests. Direct API calls to `/api/chat/completions` (e.g. from curl, Continue.dev, or other integrations) are **not tracked** unless the caller also posts to `/api/chat/completed`. |
 | Token count accuracy | The filter reads exact token counts from the provider response when available: OpenAI/compatible (`usage.prompt_tokens` / `completion_tokens`), Anthropic (`usage.input_tokens` / `output_tokens`), and Ollama (`prompt_eval_count` / `eval_count`). It falls back to character-based estimation (1 token ≈ 4 chars) only when no usage field is returned — which can occur with some streaming configurations. |
 | `chat_id` may be empty | The `chat_id` field recorded in the database is read from the request body and may not always be populated, depending on the client. |
+| Energy values are estimates | No cloud provider publishes per-token inference energy. All values in `model_data.json` are scaled from the BLOOM-176B baseline using `(params/176B)^0.8`. Parameter counts for closed-source models (GPT-4, Claude, Gemini) are community estimates, not official figures. Local model values assume unoptimised sequential inference. See `data_source_legend` in `model_data.json`. |
 
 
 ---
@@ -141,7 +142,7 @@ Both the filter and tool expose valves you can adjust in Open WebUI:
 ## Scientific Basis
 
 ### Energy consumption
-> **Luccioni, A.S., Viguier, S. & Ligozat, A-L. (2023).** *Power Hungry Processing: Watts Driving the Cost of AI Deployment?* [arXiv:2311.16863](https://arxiv.org/abs/2311.16863) / [DOI:10.1145/3627673.3679071](https://doi.org/10.1145/3627673.3679071)
+> **Luccioni, A.S., Jernite, Y. & Strubell, E. (2024).** *Power Hungry Processing: Watts Driving the Cost of AI Deployment?* [arXiv:2311.16863](https://arxiv.org/abs/2311.16863) / [DOI:10.1145/3630106.3658542](https://doi.org/10.1145/3630106.3658542) — *ACM FAccT 2024, Rio de Janeiro.*
 
 The paper directly measures energy consumption of large language models on GPU hardware.  
 **Baseline:** BLOOM-176B consumes ~0.025 Wh per 1 000 tokens on 8 × A100 GPUs.  
