@@ -27,6 +27,8 @@ Calculations are grounded in peer-reviewed research (see [Scientific Basis](#sci
 | `ai_impact_tool.py` | **Open WebUI Tool** — LLM-callable functions: `get_impact_summary`, `get_dashboard_html`, `export_data_json` |
 | `model_data.json` | Energy and cost data for 20+ AI models with full scientific provenance |
 | `dashboard.html` | Standalone HTML dashboard — open in any browser after exporting data |
+| `setup.py` | Init script run by Docker Compose to auto-register and enable the filter and tool via the Open WebUI API |
+| `.env.example` | Template for the environment variables required by the Docker Compose stack |
 | `tests/test_impact.py` | 60 unit tests covering all core logic |
 
 ---
@@ -35,25 +37,39 @@ Calculations are grounded in peer-reviewed research (see [Scientific Basis](#sci
 
 ### 🚀 One-Click Deploy (Docker Compose)
 
-The fastest way to get started is using Docker Compose, which deploys Open WebUI and the AI Impact Dashboard as separate services.
+The fastest way to get started is using Docker Compose, which deploys Open WebUI, the AI Impact Dashboard, and a one-shot setup service that registers and activates the plugins automatically.
 
 1. Clone this repository:
    ```bash
    git clone https://github.com/NCC-Open-Innovation-Office/ai-impact-plugin.git
    cd ai-impact-plugin
    ```
-2. Start the stack:
+2. Create your environment file:
+   ```bash
+   cp .env.example .env
+   ```
+   Edit `.env` and set at minimum:
+   ```
+   ADMIN_EMAIL=you@example.com
+   ADMIN_PASSWORD=a-strong-password
+   WEBUI_SECRET_KEY=a-random-secret-string
+   ```
+   > **First run:** if no Open WebUI accounts exist yet the setup service creates this admin account automatically.  
+   > **Subsequent runs:** it signs in with these credentials — make sure they match the account you used to log in the first time.
+3. Start the stack:
    ```bash
    docker compose up -d
    ```
-3. Access the services:
+4. Access the services:
    - **Open WebUI**: `http://localhost:3000`
    - **AI Impact Dashboard**: `http://localhost:8080`
-4. Enable the pre-installed plugins:
-   - **Filter**: In Open WebUI, go to **Admin Panel → Functions**, find `ai_impact_filter`:
-     1. **Toggle it ON** — click the pill switch so it turns blue/enabled. Without this the filter is saved but never runs.
-     2. **Click the 🌐 globe icon** — this makes the filter global (applies to every model). Without the globe icon the filter is silently skipped for all normal chats, even if the toggle is on.
-   - **Tool**: Go to **Workspace → Tools**, find `ai_impact_tool`, and enable it in your model's settings.
+
+The `open-webui-setup` container starts after Open WebUI is healthy, then registers the filter (enabled + global) and the tool automatically — no browser clicks required. You can watch it with:
+```bash
+docker logs open-webui-setup
+```
+
+> **One remaining manual step — attach the tool to a model:** Open WebUI does not expose an API to enable a tool globally across all models. To use the tool, go to **Workspace → Models**, edit your model, and enable **AI Impact Tool** under Tools. The filter runs for every model with no extra configuration.
 
 ---
 
