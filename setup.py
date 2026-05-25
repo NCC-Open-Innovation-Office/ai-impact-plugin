@@ -9,15 +9,18 @@ Steps
    on the very first run (the first user to sign up becomes admin in Open WebUI).
 3. Registers the AI Impact Filter function, enables it, and marks it global
    so it runs for every model without any further UI interaction.
-4. Registers the AI Impact Tool (users still need to attach it to specific
+4. Applies any environment-supplied valve overrides (e.g. Electricity Maps).
+5. Registers the AI Impact Tool (users still need to attach it to specific
    models in Workspace → Models, but the code is pre-loaded).
 
 Environment variables
 ---------------------
-WEBUI_URL       Internal URL of the Open WebUI service.  Default: http://open-webui:8080
-ADMIN_EMAIL     Admin account e-mail.  REQUIRED.
-ADMIN_PASSWORD  Admin account password.  REQUIRED.
-ADMIN_NAME      Display name used when creating the account.  Default: Admin
+WEBUI_URL                  Internal URL of the Open WebUI service.  Default: http://open-webui:8080
+ADMIN_EMAIL                Admin account e-mail.  REQUIRED.
+ADMIN_PASSWORD             Admin account password.  REQUIRED.
+ADMIN_NAME                 Display name used when creating the account.  Default: Admin
+ELECTRICITY_MAPS_API_KEY   Optional Electricity Maps API key (SCI carbon intensity).
+ELECTRICITY_MAPS_ZONE      Electricity Maps zone code.  Default: US-MIDA
 """
 
 from __future__ import annotations
@@ -38,6 +41,8 @@ BASE_URL = os.environ.get("WEBUI_URL", "http://open-webui:8080").rstrip("/")
 ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
 ADMIN_NAME = os.environ.get("ADMIN_NAME", "Admin")
+ELECTRICITY_MAPS_API_KEY = os.environ.get("ELECTRICITY_MAPS_API_KEY", "")
+ELECTRICITY_MAPS_ZONE = os.environ.get("ELECTRICITY_MAPS_ZONE", "US-MIDA")
 
 FILTER_PATH = Path("/scripts/ai_impact_filter.py")
 TOOL_PATH = Path("/scripts/ai_impact_tool.py")
@@ -164,7 +169,32 @@ def register_filter(token: str) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Step 4 – Register the Tool
+# Step 4 – Configure filter valves
+# ---------------------------------------------------------------------------
+
+
+def configure_filter_valves(token: str) -> None:
+    """Push environment-supplied valve overrides to the filter."""
+    fid = "ai_impact_filter"
+
+    valves: dict = {}
+    if ELECTRICITY_MAPS_API_KEY:
+        valves["electricity_maps_api_key"] = ELECTRICITY_MAPS_API_KEY
+    if ELECTRICITY_MAPS_ZONE:
+        valves["electricity_maps_zone"] = ELECTRICITY_MAPS_ZONE
+
+    if not valves:
+        return
+
+    resp = _request("POST", f"/api/v1/functions/id/{fid}/valves/update", valves, token=token)
+    if resp.get("_error"):
+        print(f"WARNING: Could not update filter valves: {resp}", flush=True)
+    else:
+        print("Filter valves updated (Electricity Maps configured).", flush=True)
+
+
+# ---------------------------------------------------------------------------
+# Step 5 – Register the Tool
 # ---------------------------------------------------------------------------
 
 
@@ -203,5 +233,6 @@ if __name__ == "__main__":
     wait_healthy()
     token = authenticate()
     register_filter(token)
+    configure_filter_valves(token)
     register_tool(token)
     print("Setup complete.", flush=True)

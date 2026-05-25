@@ -43,6 +43,8 @@ services:
       - ADMIN_EMAIL=${ADMIN_EMAIL}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - ADMIN_NAME=${ADMIN_NAME:-Admin}
+      - ELECTRICITY_MAPS_API_KEY=${ELECTRICITY_MAPS_API_KEY:-}
+      - ELECTRICITY_MAPS_ZONE=${ELECTRICITY_MAPS_ZONE:-US-MIDA}
     command: ["python3", "/scripts/setup.py"]
     restart: "no"
 
