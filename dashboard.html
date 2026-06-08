@@ -573,6 +573,7 @@ async function loadSavingsConfig() {
 let _refreshInterval = null;
 
 async function fetchLiveData() {
+  await loadSavingsConfig();
   try {
     const res = await fetch('/api/data');
     if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -600,7 +601,6 @@ async function fetchLiveData() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  await loadSavingsConfig();
   fetchLiveData();
 });
 
