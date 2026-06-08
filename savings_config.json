@@ -28,12 +28,21 @@
     "qwen2.5:7b":      { "display": "GPT-3.5 Turbo",  "input_per_1k": 0.000500, "output_per_1k": 0.001500 },
     "deepseek-r1:8b":  { "display": "GPT-3.5 Turbo",  "input_per_1k": 0.000500, "output_per_1k": 0.001500 },
 
-    "llama2:70b":      { "display": "GPT-4o",          "input_per_1k": 0.005000, "output_per_1k": 0.015000 },
-    "llama3:70b":      { "display": "GPT-4o",          "input_per_1k": 0.005000, "output_per_1k": 0.015000 },
-    "llama3.1:70b":    { "display": "GPT-4o",          "input_per_1k": 0.005000, "output_per_1k": 0.015000 },
-    "llama3.2:70b":    { "display": "GPT-4o",          "input_per_1k": 0.005000, "output_per_1k": 0.015000 },
-    "llama3.3:70b":    { "display": "GPT-4o",          "input_per_1k": 0.005000, "output_per_1k": 0.015000 },
-    "mixtral:8x22b":   { "display": "GPT-4o",          "input_per_1k": 0.005000, "output_per_1k": 0.015000 },
-    "deepseek-r1:70b": { "display": "GPT-4o",          "input_per_1k": 0.005000, "output_per_1k": 0.015000 }
+    "llama2:70b":      { "display": "GPT-4o",          "input_per_1k": 0.005000, "output_per_1k": 0.100000 },
+    "llama3:70b":      { "display": "GPT-4o",          "input_per_1k": 0.005000, "output_per_1k": 0.100000 },
+    "llama3.1:70b":    { "display": "GPT-4o",          "input_per_1k": 0.005000, "output_per_1k": 0.100000 },
+    "llama3.2:70b":    { "display": "GPT-4o",          "input_per_1k": 0.005000, "output_per_1k": 0.100000 },
+    "llama3.3:70b":    { "display": "GPT-4o",          "input_per_1k": 0.005000, "output_per_1k": 0.100000 },
+    "mixtral:8x22b":   { "display": "GPT-4o",          "input_per_1k": 0.005000, "output_per_1k": 0.100000 },
+    "deepseek-r1:70b": { "display": "GPT-4o",          "input_per_1k": 0.005000, "output_per_1k": 0.100000 },
+    "gpt-oss:120b":    { "display": "GPT-4o",          "input_per_1k": 0.005000, "output_per_1k": 0.100000 },
+
+    "deepseek-v4-flash":{ "display": "DeepSeek Chat",  "input_per_1k": 0.000550, "output_per_1k": 0.002190 },
+
+    "gemma4:31b":      { "display": "Gemini 4",        "input_per_1k": 0.001500, "output_per_1k": 0.009000 },
+
+    
+
+    
   }
 }
