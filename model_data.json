@@ -88,9 +88,42 @@
       "estimated_params_b": 200,
       "cloud_hosted": true,
       "energy_wh_per_1k_tokens": 0.0039,
-      "input_cost_usd_per_1k_tokens": 0.0050,
-      "output_cost_usd_per_1k_tokens": 0.0150,
-      "notes": "Multimodal model, estimated ~200B effective params. OpenAI pricing as of 2024.",
+      "input_cost_usd_per_1k_tokens": 0.00250,
+      "output_cost_usd_per_1k_tokens": 0.010,
+      "notes": "Multimodal model, estimated ~200B effective params. OpenAI pricing as of 2026.",
+      "data_source": "scaled_estimate"
+    },
+    "deepseek-reasoner": {
+      "display_name": "DeepSeek Reasoner",
+      "provider": "DeepSeek",
+      "estimated_params_b": 200,
+      "cloud_hosted": true,
+      "energy_wh_per_1k_tokens": 0.0039,
+      "input_cost_usd_per_1k_tokens": 0.000550,
+      "output_cost_usd_per_1k_tokens": 0.00219,
+      "notes": "Multimodal model, estimated ~200B effective params. OpenAI pricing as of 2026.",
+      "data_source": "scaled_estimate"
+    },
+    "deepseek-chat": {
+      "display_name": "DeepSeek Chat",
+      "provider": "Deepseek",
+      "estimated_params_b": 200,
+      "cloud_hosted": true,
+      "energy_wh_per_1k_tokens": 0.0039,
+      "input_cost_usd_per_1k_tokens": 0.00027,
+      "output_cost_usd_per_1k_tokens": 0.0010,
+      "notes": "Multimodal model, estimated ~200B effective params. OpenAI pricing as of 2026.",
+      "data_source": "scaled_estimate"
+    },
+    "Gemini-3.5-Flash": {
+      "display_name": "Gemma 4",
+      "provider": "Google",
+      "estimated_params_b": 200,
+      "cloud_hosted": true,
+      "energy_wh_per_1k_tokens": 0.0039,
+      "input_cost_usd_per_1k_tokens": 0.00150,
+      "output_cost_usd_per_1k_tokens": 0.009,
+      "notes": "Multimodal model, estimated ~200B effective params. OpenAI pricing as of 2026.",
       "data_source": "scaled_estimate"
     },
     "gpt-4o-mini": {
@@ -276,6 +309,18 @@
       "notes": "MoE model with ~12B active params per forward pass. Local deployment.",
       "data_source": "scaled_estimate"
     },
+    "gemma4:31b": {
+      "display_name": "Gemma 31B",
+      "provider": "Google (local)",
+      "estimated_params_b": 2,
+      "cloud_hosted": false,
+      "commercial_equivalent": "Gemini-3.5-Flash",
+      "energy_wh_per_1k_tokens": 0.000663,
+      "input_cost_usd_per_1k_tokens": 0.0,
+      "output_cost_usd_per_1k_tokens": 0.0,
+      "notes": "Local deployment. Energy: (2/176)^0.8 * 0.025.",
+      "data_source": "scaled_estimate"
+    },
     "gemma:7b": {
       "display_name": "Gemma 7B",
       "provider": "Google (local)",
@@ -346,6 +391,31 @@
       "notes": "Faster, lighter Gemini model. Google pricing as of 2024.",
       "data_source": "scaled_estimate"
     },
+    "gpt-oss:120b": {
+      "display_name": "ChatGPT OSS",
+      "provider": "OpenAI (local)",
+      "estimated_params_b": 2,
+      "cloud_hosted": false,
+      "commercial_equivalent": "gpt-4o",
+      "energy_wh_per_1k_tokens": 0.000663,
+      "input_cost_usd_per_1k_tokens": 0.0,
+      "output_cost_usd_per_1k_tokens": 0.0,
+      "notes": "Local deployment. Energy: (2/176)^0.8 * 0.025.",
+      "data_source": "scaled_estimate"
+    },
+    "gpt-oss:120b": {
+      "display_name": "DeepSeek v4 Flash",
+      "provider": "DeepSeek (local)",
+      "estimated_params_b": 2,
+      "cloud_hosted": false,
+      "commercial_equivalent": "deepseek-chat",
+      "energy_wh_per_1k_tokens": 0.000663,
+      "input_cost_usd_per_1k_tokens": 0.0,
+      "output_cost_usd_per_1k_tokens": 0.0,
+      "notes": "Local deployment. Energy: (2/176)^0.8 * 0.025.",
+      "data_source": "scaled_estimate"
+    },
+    
     "default": {
       "display_name": "Unknown Model",
       "provider": "Unknown",
