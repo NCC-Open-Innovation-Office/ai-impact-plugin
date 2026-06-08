@@ -39,10 +39,6 @@
 
     "deepseek-v4-flash":{ "display": "DeepSeek Chat",  "input_per_1k": 0.000550, "output_per_1k": 0.002190 },
 
-    "gemma4:31b":      { "display": "Gemini 4",        "input_per_1k": 0.001500, "output_per_1k": 0.009000 },
-
-    
-
-    
+    "gemma4:31b":      { "display": "Gemini 4",        "input_per_1k": 0.001500, "output_per_1k": 0.009000 }
   }
 }

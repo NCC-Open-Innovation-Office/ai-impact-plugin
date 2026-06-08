@@ -270,42 +270,10 @@ Chart.defaults.borderColor = '#2d3148';
 const PALETTE = ['#3b82f6','#ef4444','#22c55e','#f59e0b','#8b5cf6','#ec4899','#14b8a6','#f97316','#64748b','#a78bfa'];
 
 // Local model → commercial API equivalent mapping.
-// These are the built-in defaults. When running via Docker Compose, edit
-// savings_config.json in the project root to override — no rebuild needed.
+// Populated at runtime from /api/savings-config (savings_config.json).
+// Edit savings_config.json in the project root — no rebuild needed.
 // Source: Saad-Falcon et al. (2025) "Intelligence per Watt" arXiv:2511.07885
-let COMMERCIAL_EQUIV = {
-  // ≤4 B params — GPT-4o Mini  ($0.000150 / $0.000600 per 1k tokens in / out)
-  'llama3.2:1b':     { display: 'GPT-4o Mini',    input_per_1k: 0.000150, output_per_1k: 0.000600 },
-  'llama3.2:3b':     { display: 'GPT-4o Mini',    input_per_1k: 0.000150, output_per_1k: 0.000600 },
-  'gemma:2b':        { display: 'GPT-4o Mini',    input_per_1k: 0.000150, output_per_1k: 0.000600 },
-  'gemma2:2b':       { display: 'GPT-4o Mini',    input_per_1k: 0.000150, output_per_1k: 0.000600 },
-  'phi3':            { display: 'GPT-4o Mini',    input_per_1k: 0.000150, output_per_1k: 0.000600 },
-  'phi3.5':          { display: 'GPT-4o Mini',    input_per_1k: 0.000150, output_per_1k: 0.000600 },
-  // 7–14 B params — GPT-3.5 Turbo ($0.000500 / $0.001500 per 1k tokens in / out)
-  'llama2:7b':       { display: 'GPT-3.5 Turbo',  input_per_1k: 0.000500, output_per_1k: 0.001500 },
-  'llama3:8b':       { display: 'GPT-3.5 Turbo',  input_per_1k: 0.000500, output_per_1k: 0.001500 },
-  'llama3.1:8b':     { display: 'GPT-3.5 Turbo',  input_per_1k: 0.000500, output_per_1k: 0.001500 },
-  'llama3.2:8b':     { display: 'GPT-3.5 Turbo',  input_per_1k: 0.000500, output_per_1k: 0.001500 },
-  'mistral':         { display: 'GPT-3.5 Turbo',  input_per_1k: 0.000500, output_per_1k: 0.001500 },
-  'mistral:7b':      { display: 'GPT-3.5 Turbo',  input_per_1k: 0.000500, output_per_1k: 0.001500 },
-  'mistral:latest':  { display: 'GPT-3.5 Turbo',  input_per_1k: 0.000500, output_per_1k: 0.001500 },
-  'gemma:7b':        { display: 'GPT-3.5 Turbo',  input_per_1k: 0.000500, output_per_1k: 0.001500 },
-  'gemma2:9b':       { display: 'GPT-3.5 Turbo',  input_per_1k: 0.000500, output_per_1k: 0.001500 },
-  'llama2:13b':      { display: 'GPT-3.5 Turbo',  input_per_1k: 0.000500, output_per_1k: 0.001500 },
-  'phi3:medium':     { display: 'GPT-3.5 Turbo',  input_per_1k: 0.000500, output_per_1k: 0.001500 },
-  'mixtral:8x7b':    { display: 'GPT-3.5 Turbo',  input_per_1k: 0.000500, output_per_1k: 0.001500 },
-  'qwen2:7b':        { display: 'GPT-3.5 Turbo',  input_per_1k: 0.000500, output_per_1k: 0.001500 },
-  'qwen2.5:7b':      { display: 'GPT-3.5 Turbo',  input_per_1k: 0.000500, output_per_1k: 0.001500 },
-  'deepseek-r1:8b':  { display: 'GPT-3.5 Turbo',  input_per_1k: 0.000500, output_per_1k: 0.001500 },
-  // 70 B+ params — GPT-4o ($0.005000 / $0.015000 per 1k tokens in / out)
-  'llama2:70b':      { display: 'GPT-4o',          input_per_1k: 0.005000, output_per_1k: 0.015000 },
-  'llama3:70b':      { display: 'GPT-4o',          input_per_1k: 0.005000, output_per_1k: 0.015000 },
-  'llama3.1:70b':    { display: 'GPT-4o',          input_per_1k: 0.005000, output_per_1k: 0.015000 },
-  'llama3.2:70b':    { display: 'GPT-4o',          input_per_1k: 0.005000, output_per_1k: 0.015000 },
-  'llama3.3:70b':    { display: 'GPT-4o',          input_per_1k: 0.005000, output_per_1k: 0.015000 },
-  'mixtral:8x22b':   { display: 'GPT-4o',          input_per_1k: 0.005000, output_per_1k: 0.015000 },
-  'deepseek-r1:70b': { display: 'GPT-4o',          input_per_1k: 0.005000, output_per_1k: 0.015000 },
-};
+let COMMERCIAL_EQUIV = {};
 
 let charts = {};
 
