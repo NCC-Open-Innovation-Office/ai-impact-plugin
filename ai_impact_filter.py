@@ -30,7 +30,7 @@ description: >
 required_open_webui_version: 0.3.17
 requirements: pydantic>=2.0.0
 version: 1.0.0
-licence: MIT
+licence: GPL-3.0-or-later
 """
 
 from __future__ import annotations

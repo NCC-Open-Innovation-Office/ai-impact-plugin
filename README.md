@@ -254,4 +254,4 @@ When `show_impact_in_response` is enabled, each assistant message includes:
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+GPLv3 — see [LICENSE](LICENSE).
