@@ -60,7 +60,7 @@ SCALING_EXPONENT: float = 0.8                     # Luccioni et al. (2023)
 CLOUD_EFFICIENCY_FACTOR: float = 0.5             # cloud vs. local deployment
 
 # ---------------------------------------------------------------------------
-# Model energy + cost lookup table  (loaded from model_data.json at start-up)
+# Model energy + cost lookup table  (reloaded from model_data.json when it changes)
 # ---------------------------------------------------------------------------
 
 _MODEL_DATA: dict[str, dict] = {}
@@ -413,6 +413,7 @@ class Filter:
     def __init__(self):
         self.valves = self.Valves()
         self._model_data: dict[str, dict] = _load_model_data()
+        self._model_data_mtime: float = _MODEL_DATA_PATH.stat().st_mtime if _MODEL_DATA_PATH.exists() else 0.0
         self._conn: Optional[sqlite3.Connection] = None
         self._intensity_cache: dict = {}  # {"value": float, "ts": float}
 
@@ -472,6 +473,16 @@ class Filter:
         """Pass-through – no pre-processing needed."""
         return body
 
+    def _reload_model_data_if_changed(self) -> None:
+        """Hot-reload model_data.json when the file has been modified on disk."""
+        try:
+            mtime = _MODEL_DATA_PATH.stat().st_mtime
+        except OSError:
+            return
+        if mtime != self._model_data_mtime:
+            self._model_data = _load_model_data()
+            self._model_data_mtime = mtime
+
     async def outlet(
         self,
         body: dict,
@@ -483,6 +494,7 @@ class Filter:
         persist to SQLite, and (optionally) annotate the assistant message.
         """
         try:
+            self._reload_model_data_if_changed()
             model: str = body.get("model", "unknown")
             input_tokens, output_tokens = _extract_usage(body)
 

@@ -153,7 +153,18 @@ def register_filter(token: str) -> None:
         # Re-fetch so the toggle checks below have accurate state.
         existing = _request("GET", f"/api/v1/functions/id/{fid}", token=token)
     else:
-        print(f"Filter '{fid}' already registered.", flush=True)
+        # Update the filter content in case the code has changed since first run.
+        resp = _request("POST", f"/api/v1/functions/id/{fid}/update", {
+            "id": fid,
+            "name": "AI Impact Filter",
+            "content": content,
+            "meta": existing.get("meta", {"description": "", "manifest": {}}),
+        }, token=token)
+        if resp.get("_error"):
+            print(f"WARNING: Could not update filter content: {resp}", flush=True)
+        else:
+            print(f"Filter '{fid}' updated.", flush=True)
+        existing = resp if "id" in resp else existing
 
     if not existing.get("is_active"):
         _request("POST", f"/api/v1/functions/id/{fid}/toggle", token=token)
