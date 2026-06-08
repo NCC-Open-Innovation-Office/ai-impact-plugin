@@ -111,6 +111,7 @@ services:
       # Same named volume, mounted at the path the server expects
       - ai-impact-data:/data/ai_impact
       - ./savings_config.json:/app/savings_config.json:ro
+      - ./dashboard.html:/app/dashboard.html:ro
     environment:
       - AI_IMPACT_DB_PATH=/data/ai_impact/usage.db
       - AI_SAVINGS_CONFIG_PATH=/app/savings_config.json
