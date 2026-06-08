@@ -317,7 +317,7 @@ function processRecords(records) {
     }
 
     // Cost savings vs. cloud API (local models only)
-    const equiv = COMMERCIAL_EQUIV[r.model];
+    const equiv = COMMERCIAL_EQUIV[r.model] || COMMERCIAL_EQUIV['default'];
     if (equiv) {
       // Fall back to 50/50 split if per-direction token counts not recorded
       const inT  = r.input_tokens  != null ? r.input_tokens  : Math.floor((r.total_tokens || 0) * 0.5);

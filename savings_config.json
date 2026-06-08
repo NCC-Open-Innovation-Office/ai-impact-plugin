@@ -39,6 +39,14 @@
 
     "deepseek-v4-flash":{ "display": "DeepSeek Chat",  "input_per_1k": 0.000550, "output_per_1k": 0.002190 },
 
-    "gemma4:31b":      { "display": "Gemini 4",        "input_per_1k": 0.001500, "output_per_1k": 0.009000 }
+    "gemma4:31b":      { "display": "Gemini 4",        "input_per_1k": 0.001500, "output_per_1k": 0.009000 },
+
+    "_custom_names": "Custom Open WebUI model names mapped to flagship API pricing (June 2026)",
+    "google":              { "display": "Gemini 2.5 Pro",  "input_per_1k": 0.001250, "output_per_1k": 0.010000 },
+    "openai":              { "display": "GPT-4o",           "input_per_1k": 0.002500, "output_per_1k": 0.010000 },
+    "deepseek":            { "display": "DeepSeek V3",      "input_per_1k": 0.000270, "output_per_1k": 0.001100 },
+    "medical-care-android":{ "display": "Gemini 2.5 Pro",  "input_per_1k": 0.001250, "output_per_1k": 0.010000 },
+
+    "default":         { "display": "GPT-4o",          "input_per_1k": 0.002500, "output_per_1k": 0.010000 }
   }
 }
