@@ -11,10 +11,11 @@ Calculations are grounded in peer-reviewed research (see [Scientific Basis](#sci
 | Feature | Description |
 |---------|-------------|
 | 🌱 Real-time footprint | Every assistant reply is annotated with energy, CO₂, water, and cost (WebUI chat only — see [Limitations](#limitations)) |
-| 📊 Dashboard | Interactive HTML dashboard with charts and per-model breakdowns |
+| 📊 Dashboard | Interactive HTML dashboard with charts, per-model breakdowns, and local AI savings |
+| 💰 Local AI Savings | Every local-model query is compared to its nearest commercial API equivalent — total savings vs. cloud pricing shown in the dashboard |
 | 🗄️ Persistent storage | All records saved to a local SQLite database |
-| 🔬 Science-backed | Calculations derived from Luccioni et al. (2023) and Li et al. (2023) |
-| ⚙️ Configurable | Grid carbon intensity, WUE coefficient, and DB path are all adjustable |
+| 🔬 Science-backed | Calculations derived from Luccioni et al. (2023), Li et al. (2023), and Saad-Falcon et al. (2025) |
+| ⚙️ Configurable | Grid carbon intensity, WUE coefficient, DB path, and commercial API equivalents are all adjustable |
 | 🤖 20+ models | Built-in data for GPT-4, Claude, Llama, Mistral, Gemma, Phi-3, and more |
 
 ---
@@ -25,8 +26,10 @@ Calculations are grounded in peer-reviewed research (see [Scientific Basis](#sci
 |------|---------|
 | `ai_impact_filter.py` | **Open WebUI Filter** — intercepts every response, calculates and stores impact, optionally annotates the chat message |
 | `ai_impact_tool.py` | **Open WebUI Tool** — LLM-callable functions: `get_impact_summary`, `get_dashboard_html`, `export_data_json` |
-| `model_data.json` | Energy and cost data for 20+ AI models with full scientific provenance |
+| `model_data.json` | Energy, cost, and commercial-equivalent data for 20+ AI models with full scientific provenance |
+| `savings_config.json` | Configurable commercial API equivalents for local models — edit to customise savings calculations, no rebuild required |
 | `dashboard.html` | Standalone HTML dashboard — open in any browser after exporting data |
+| `dashboard_server.py` | FastAPI server that serves the dashboard and exposes `/api/data` and `/api/savings-config` |
 | `setup.py` | Init script run by Docker Compose to auto-register and enable the filter and tool via the Open WebUI API |
 | `.env.example` | Template for the environment variables required by the Docker Compose stack |
 | `tests/test_impact.py` | 60 unit tests covering all core logic |
@@ -38,6 +41,13 @@ Calculations are grounded in peer-reviewed research (see [Scientific Basis](#sci
 ### 🚀 One-Click Deploy (Docker Compose)
 
 The fastest way to get started is using Docker Compose, which deploys Open WebUI, the AI Impact Dashboard, and a one-shot setup service that registers and activates the plugins automatically.
+
+Two compose files are available — choose one:
+
+| Compose file | Use when |
+|---|---|
+| `docker-compose.yaml` | You supply your own AI backend (OpenAI API key, external Ollama, etc.) |
+| `docker-compose.ollama.yaml` | You want a fully self-contained local stack with Ollama included |
 
 1. Clone this repository:
    ```bash
@@ -56,9 +66,21 @@ The fastest way to get started is using Docker Compose, which deploys Open WebUI
    ```
    > **First run:** if no Open WebUI accounts exist yet the setup service creates this admin account automatically.  
    > **Subsequent runs:** it signs in with these credentials — make sure they match the account you used to log in the first time.
+
+   **Optional — local Ollama model** (`docker-compose.ollama.yaml` only):  
+   Set `OLLAMA_MODEL` in `.env` to have a model pulled automatically on first start.
+   Leave it blank (the default) to start with an empty Ollama instance and pull models manually later:
+   ```bash
+   docker exec ollama ollama pull llama3.2:1b
+   ```
+
 3. Start the stack:
    ```bash
+   # Standard (external AI backend)
    docker compose up -d
+
+   # With local Ollama
+   docker compose -f docker-compose.ollama.yaml up -d
    ```
 4. Access the services:
    - **Open WebUI**: `http://localhost:3000`
@@ -125,6 +147,26 @@ Both the filter and tool expose valves you can adjust in Open WebUI:
 | `electricity_maps_api_key` | *(empty)* | [Electricity Maps](https://api.electricitymap.org) API key for real-time marginal carbon intensity (SCI methodology). Free tier available. |
 | `electricity_maps_zone` | `US-MIDA` | Electricity Maps zone for the data centre serving your AI provider (e.g. `IE`, `FR`, `US-CAL-CISO`). [Full zone list](https://api.electricitymap.org/v3/zones). |
 
+### Customising Local AI Savings
+
+The commercial API equivalents used in the savings calculation are driven by `savings_config.json` in the project root. Edit it to add new models, change which commercial model a local model is compared against, or update prices — then restart the dashboard container (no rebuild needed):
+
+```bash
+docker restart ai-impact-dashboard
+```
+
+Each entry maps an Ollama model name to a commercial equivalent:
+
+```json
+"llama3:8b": { "display": "GPT-3.5 Turbo", "input_per_1k": 0.000500, "output_per_1k": 0.001500 }
+```
+
+To find the exact model name Ollama is using:
+
+```bash
+docker exec ollama ollama list
+```
+
 ---
 
 ## Limitations
@@ -168,6 +210,18 @@ When an `electricity_maps_api_key` is configured the plugin switches to the **Gr
 > Fetches live *marginal* carbon intensity for the configured grid zone from the [Electricity Maps API](https://api.electricitymap.org) (g CO₂eq/kWh), refreshed hourly.  
 > Marginal intensity reflects the carbon cost of the *next unit of demand* on the grid — more accurate than an annual average, especially when renewables are actively displacing gas.  
 > Falls back to the EPA eGRID value on any API error.
+
+### Local AI Savings
+
+> **Saad-Falcon, J., Narayan, A., Akengin, H.O., Griffin, J.W. et al. (2025).** *Intelligence per Watt: Measuring Intelligence Efficiency of Local AI.* [arXiv:2511.07885](https://arxiv.org/abs/2511.07885)
+
+This paper introduces **Intelligence per Watt (IPW)** — task accuracy per unit of power — as a unified metric for local inference efficiency. Key findings used in this plugin:
+
+- Local LMs (≤20 B active parameters) successfully answer **88.7%** of real-world single-turn chat and reasoning queries at frontier-model accuracy.
+- IPW improved **5.3×** from 2023–2025, driven by algorithmic and hardware advances.
+- Locally-serviceable query coverage rose from **23.2% to 71.3%** over the same period.
+
+The dashboard uses these findings to justify matching local models to commercial API equivalents by capability tier, then computing the cost difference as **savings** — what you would have paid had each local query been sent to a cloud API instead. Tier assignments and pricing are configured in `savings_config.json`.
 
 ---
 

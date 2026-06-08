@@ -12,6 +12,7 @@ same SQLite file.
 
 from __future__ import annotations
 
+import json
 import os
 import sqlite3
 from pathlib import Path
@@ -22,6 +23,7 @@ from fastapi.responses import HTMLResponse, JSONResponse
 app = FastAPI(docs_url=None, redoc_url=None)
 
 DB_PATH = Path(os.environ.get("AI_IMPACT_DB_PATH", "/data/ai_impact/usage.db"))
+SAVINGS_CONFIG_PATH = Path(os.environ.get("AI_SAVINGS_CONFIG_PATH", "/app/savings_config.json"))
 _HTML_PATH = Path(__file__).parent / "dashboard.html"
 
 
@@ -50,5 +52,20 @@ async def get_data() -> JSONResponse:
     except Exception as exc:
         return JSONResponse(
             {"records": [], "status": "error", "detail": str(exc)},
+            status_code=500,
+        )
+
+
+@app.get("/api/savings-config")
+async def get_savings_config() -> JSONResponse:
+    """Return the commercial equivalent mappings from savings_config.json."""
+    if not SAVINGS_CONFIG_PATH.exists():
+        return JSONResponse({"commercial_equivalents": {}})
+    try:
+        data = json.loads(SAVINGS_CONFIG_PATH.read_text(encoding="utf-8"))
+        return JSONResponse(data)
+    except Exception as exc:
+        return JSONResponse(
+            {"commercial_equivalents": {}, "error": str(exc)},
             status_code=500,
         )

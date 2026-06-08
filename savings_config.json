@@ -1,0 +1,39 @@
+{
+  "description": "Commercial API equivalents for local Ollama models. Edit this file to customize the savings calculations shown in the AI Impact Dashboard. Restart the dashboard container after changes (no rebuild needed).",
+  "source": "Tier assignments based on Saad-Falcon et al. (2025) 'Intelligence per Watt' arXiv:2511.07885. Pricing: OpenAI list prices as of June 2025.",
+  "pricing_note": "input_per_1k and output_per_1k are USD per 1,000 tokens.",
+  "commercial_equivalents": {
+    "_tiers": "≤4B params → GPT-4o Mini | 7–14B params → GPT-3.5 Turbo | 70B+ params → GPT-4o",
+
+    "llama3.2:1b":     { "display": "GPT-4o Mini",    "input_per_1k": 0.000150, "output_per_1k": 0.000600 },
+    "llama3.2:3b":     { "display": "GPT-4o Mini",    "input_per_1k": 0.000150, "output_per_1k": 0.000600 },
+    "gemma:2b":        { "display": "GPT-4o Mini",    "input_per_1k": 0.000150, "output_per_1k": 0.000600 },
+    "gemma2:2b":       { "display": "GPT-4o Mini",    "input_per_1k": 0.000150, "output_per_1k": 0.000600 },
+    "phi3":            { "display": "GPT-4o Mini",    "input_per_1k": 0.000150, "output_per_1k": 0.000600 },
+    "phi3.5":          { "display": "GPT-4o Mini",    "input_per_1k": 0.000150, "output_per_1k": 0.000600 },
+
+    "llama2:7b":       { "display": "GPT-3.5 Turbo",  "input_per_1k": 0.000500, "output_per_1k": 0.001500 },
+    "llama3:8b":       { "display": "GPT-3.5 Turbo",  "input_per_1k": 0.000500, "output_per_1k": 0.001500 },
+    "llama3.1:8b":     { "display": "GPT-3.5 Turbo",  "input_per_1k": 0.000500, "output_per_1k": 0.001500 },
+    "llama3.2:8b":     { "display": "GPT-3.5 Turbo",  "input_per_1k": 0.000500, "output_per_1k": 0.001500 },
+    "mistral":         { "display": "GPT-3.5 Turbo",  "input_per_1k": 0.000500, "output_per_1k": 0.001500 },
+    "mistral:7b":      { "display": "GPT-3.5 Turbo",  "input_per_1k": 0.000500, "output_per_1k": 0.001500 },
+    "mistral:latest":  { "display": "GPT-3.5 Turbo",  "input_per_1k": 0.000500, "output_per_1k": 0.001500 },
+    "gemma:7b":        { "display": "GPT-3.5 Turbo",  "input_per_1k": 0.000500, "output_per_1k": 0.001500 },
+    "gemma2:9b":       { "display": "GPT-3.5 Turbo",  "input_per_1k": 0.000500, "output_per_1k": 0.001500 },
+    "llama2:13b":      { "display": "GPT-3.5 Turbo",  "input_per_1k": 0.000500, "output_per_1k": 0.001500 },
+    "phi3:medium":     { "display": "GPT-3.5 Turbo",  "input_per_1k": 0.000500, "output_per_1k": 0.001500 },
+    "mixtral:8x7b":    { "display": "GPT-3.5 Turbo",  "input_per_1k": 0.000500, "output_per_1k": 0.001500 },
+    "qwen2:7b":        { "display": "GPT-3.5 Turbo",  "input_per_1k": 0.000500, "output_per_1k": 0.001500 },
+    "qwen2.5:7b":      { "display": "GPT-3.5 Turbo",  "input_per_1k": 0.000500, "output_per_1k": 0.001500 },
+    "deepseek-r1:8b":  { "display": "GPT-3.5 Turbo",  "input_per_1k": 0.000500, "output_per_1k": 0.001500 },
+
+    "llama2:70b":      { "display": "GPT-4o",          "input_per_1k": 0.005000, "output_per_1k": 0.015000 },
+    "llama3:70b":      { "display": "GPT-4o",          "input_per_1k": 0.005000, "output_per_1k": 0.015000 },
+    "llama3.1:70b":    { "display": "GPT-4o",          "input_per_1k": 0.005000, "output_per_1k": 0.015000 },
+    "llama3.2:70b":    { "display": "GPT-4o",          "input_per_1k": 0.005000, "output_per_1k": 0.015000 },
+    "llama3.3:70b":    { "display": "GPT-4o",          "input_per_1k": 0.005000, "output_per_1k": 0.015000 },
+    "mixtral:8x22b":   { "display": "GPT-4o",          "input_per_1k": 0.005000, "output_per_1k": 0.015000 },
+    "deepseek-r1:70b": { "display": "GPT-4o",          "input_per_1k": 0.005000, "output_per_1k": 0.015000 }
+  }
+}

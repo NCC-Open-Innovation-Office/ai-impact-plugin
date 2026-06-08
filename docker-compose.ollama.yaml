@@ -46,8 +46,8 @@ services:
         condition: service_healthy
     environment:
       - OLLAMA_HOST=http://ollama:11434
-      - OLLAMA_MODEL=${OLLAMA_MODEL:-llama3.2:1b}
-    entrypoint: ["/bin/sh", "-c", "ollama pull $OLLAMA_MODEL"]
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-}
+    entrypoint: ["/bin/sh", "-c", "[ -n \"$OLLAMA_MODEL\" ] && ollama pull $OLLAMA_MODEL || echo 'OLLAMA_MODEL not set — skipping model pull. Set it in .env to auto-download a model.'"]
     restart: "no"
 
   # --------------------------------------------------------------------------
@@ -110,8 +110,10 @@ services:
     volumes:
       # Same named volume, mounted at the path the server expects
       - ai-impact-data:/data/ai_impact
+      - ./savings_config.json:/app/savings_config.json:ro
     environment:
       - AI_IMPACT_DB_PATH=/data/ai_impact/usage.db
+      - AI_SAVINGS_CONFIG_PATH=/app/savings_config.json
     restart: always
 
 volumes:
