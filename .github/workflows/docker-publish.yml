@@ -3,11 +3,6 @@ name: Build and Publish Dashboard Image
 on:
   push:
     branches: [main]
-    paths:
-      - "dashboard_server.py"
-      - "dashboard.html"
-      - "Dockerfile.dashboard"
-      - ".github/workflows/docker-publish.yml"
   workflow_dispatch:
 
 env:
